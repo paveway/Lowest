@@ -6,7 +6,9 @@
 
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="14" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -22,6 +24,38 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="info.paveway.lowest.GoodsDetailActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="info.paveway.lowest.GoodsEditActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="info.paveway.lowest.PriceEditActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="info.paveway.lowest.ShopListActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.google.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
+        <provider
+            android:name="info.paveway.lowest.data.GoodsProvider"
+            android:authorities="info.paveway.lowest.data.goodsprovider"
+            android:exported="false" />
+        <provider
+            android:name="info.paveway.lowest.data.PriceProvider"
+            android:authorities="info.paveway.lowest.data.priceprovider"
+            android:exported="false" />
+        <provider
+            android:name="info.paveway.lowest.data.ShopProvider"
+            android:authorities="info.paveway.lowest.data.shopprovider"
+            android:exported="false" />
     </application>
 
 </manifest>
