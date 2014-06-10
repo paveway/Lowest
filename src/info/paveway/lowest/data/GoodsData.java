@@ -1,6 +1,5 @@
 package info.paveway.lowest.data;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -9,19 +8,21 @@ import java.util.TreeMap;
 
 /**
  * 最低価格
- * 品物データ保持クラス
+ * 商品データクラス
  *
  * @version 1.0 新規作成
  *
  */
-@SuppressWarnings("serial")
-public class GoodsData implements Serializable {
+public class GoodsData extends AbstractBaseData {
 
-    /** 品物ID */
-    private int mGoodsId;
+    /** カテゴリID */
+    private long mCategoryId;
 
-    /** 品物名 */
-    private String mGoodsName;
+    /** カテゴリ名 */
+    private String mCategoryName;
+
+    /** メモ */
+    private String mMemo;
 
     /**
      * 価格データマップ
@@ -42,39 +43,57 @@ public class GoodsData implements Serializable {
     }
 
     /**
-     * 品物IDを設定する。
+     * カテゴリIDを設定する。
      *
-     * @param goodsId 品物ID
+     * @param categoryId カテゴリID
      */
-    public void setGoodsId(int goodsId) {
-        mGoodsId = goodsId;
+    public void setCategoryId(long categoryId) {
+        mCategoryId = categoryId;
     }
 
     /**
-     * 品物IDを返却する。
+     * カテゴリIDを返却する。
      *
-     * @return 品物ID
+     * @return カテゴリID
      */
-    public int getGoodsId() {
-        return mGoodsId;
+    public long getCategoryId() {
+        return mCategoryId;
     }
 
     /**
-     * 品物名を設定する。
+     * カテゴリ名を設定する。
      *
-     * @param goodsName 品物名
+     * @param categoryName カテゴリ名
      */
-    public void setGoodsName(String goodsName) {
-        mGoodsName = goodsName;
+    public void setCategoryName(String categoryName) {
+        mCategoryName = categoryName;
     }
 
     /**
-     * 品物名を返却する。
+     * カテゴリ名を返却する。
      *
-     * @return 品物名
+     * @return カテゴリ名
      */
-    public String getGoodsName() {
-        return mGoodsName;
+    public String getCategoryName() {
+        return mCategoryName;
+    }
+
+    /**
+     * メモを設定する。
+     *
+     * @param memo メモ
+     */
+    public void setMemo(String memo) {
+        mMemo = memo;
+    }
+
+    /**
+     * メモを返却する。
+     *
+     * @return メモ
+     */
+    public String getMemo() {
+        return mMemo;
     }
 
     /**
@@ -83,7 +102,7 @@ public class GoodsData implements Serializable {
      * @param priceData 価格データ
      */
     public void addPriceData(PriceData priceData) {
-    	mPriceDataMap.put(priceData.getUnitPrice(), priceData);
+        mPriceDataMap.put(priceData.getUnitPrice(), priceData);
     }
 
     /**
@@ -92,15 +111,15 @@ public class GoodsData implements Serializable {
      * @return 最低価格の価格データ
      */
     public PriceData getLowestPriceData() {
-    	Iterator<PriceData> itr = mPriceDataMap.values().iterator();
-    	// データがある場合
-    	if (itr.hasNext()) {
-    		return itr.next();
+        Iterator<PriceData> itr = mPriceDataMap.values().iterator();
+        // データがある場合
+        if (itr.hasNext()) {
+            return itr.next();
 
-    	// データが無い場合
-    	} else {
-    		return null;
-    	}
+        // データが無い場合
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -109,11 +128,11 @@ public class GoodsData implements Serializable {
      * @return 価格データリスト
      */
     public List<PriceData> getPriceDataList() {
-    	mPriceDataList.clear();
-    	Iterator<PriceData> itr = mPriceDataMap.values().iterator();
-    	while (itr.hasNext()) {
-    		mPriceDataList.add(itr.next());
-    	}
-    	return mPriceDataList;
+        mPriceDataList.clear();
+        Iterator<PriceData> itr = mPriceDataMap.values().iterator();
+        while (itr.hasNext()) {
+            mPriceDataList.add(itr.next());
+        }
+        return mPriceDataList;
     }
 }

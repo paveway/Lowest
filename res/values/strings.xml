@@ -1,8 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Sample</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="app_name">最低価格</string>
+    <string name="main_name">最低価格</string>
+    <string name="goods_list_name">商品リスト</string>
+    <string name="goods_detail_name">商品詳細</string>
+    <string name="goods_edit_name">商品編集</string>
+    <string name="price_edit_name">価格編集</string>
+    <string name="shop_list_name">店名リスト</string>
+
+    <string name="action_settings">設定</string>
+
+    <string name="add_button">追加</string>
+    <string name="edit_button">編集</string>
+    <string name="delete_button">削除</string>
+    <string name="regist_button">登録</string>
+    <string name="clear_button">クリア</string>
+    <string name="unit_button">単位</string>
+
+    <string name="category_name_label">カテゴリ名</string>
+    <string name="goods_name_label">商品名</string>
+    <string name="quantity_label">数量</string>
+    <string name="price_label">価格</string>
+    <string name="memo_label">メモ</string>
+
+    <string name="no_delete_message">このデータは削除できません</string>
+
+    <string name="delete_dialog_title">削除確認</string>
+    <string name="delete_dialog_message">このデータを削除しますか</string>
+    <string name="delete_dialog_positive_button">削除</string>
+    <string name="delete_dialog_negative_button">キャンセル</string>
+
+    <string name="categoryname_dialog_title">カテゴリ名入力</string>
+    <string name="categoryname_dialog_positive_button">OK</string>
+    <string name="categoryname_dialog_netative_button">キャンセル</string>
+
+    <string name="categoryname_registed">登録済みです</string>
+    <string name="categoryname_regist_success">カテゴリ名を登録しました</string>
+    <string name="categoryname_regist_failure">カテゴリ名を登録できませんでした</string>
+    <string name="categoryname_no_input">カテゴリ名を入力してください</string>
+
+    <string name="pricedata_delete_error">価格データの削除に失敗しました</string>
+
+    <string name="illeagal_transition">不正な画面遷移です</string>
 
 </resources>

@@ -21,14 +21,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:text="登録" />
+            android:text="@string/regist_button" />
 
         <Button
             android:id="@+id/clearButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:text="クリア" />
+            android:text="@string/clear_button" />
 
     </RelativeLayout>
 
@@ -38,15 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
 
-        <com.google.ads.AdView
-            android:id="@+id/adView"
-            android:layout_width="match_parent"
-            android:layout_height="66dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            ads:adSize="BANNER"
-            ads:adUnitId="ca-app-pub-6984834494761648/8209184212"
-            ads:loadAdOnCreate="true" />
+        <include layout="@layout/adview" />
 
     </LinearLayout>
 
@@ -84,7 +76,7 @@
                 android:id="@+id/quantityLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="数量" />
+                android:text="@string/quantity_label" />
 
             <EditText
                 android:id="@+id/quantityValue"
@@ -107,7 +99,7 @@
                 android:id="@+id/priceLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="価格" />
+                android:text="@string/price_label" />
 
             <EditText
                 android:id="@+id/priceValue"

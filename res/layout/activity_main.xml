@@ -21,7 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:text="追加" />
+            android:text="@string/add_button" />
 
     </RelativeLayout>
 
@@ -31,20 +31,12 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
 
-        <com.google.ads.AdView
-            android:id="@+id/adView"
-            android:layout_width="match_parent"
-            android:layout_height="66dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            ads:adSize="BANNER"
-            ads:adUnitId="ca-app-pub-6984834494761648/8209184212"
-            ads:loadAdOnCreate="true" />
+        <include layout="@layout/adview" />
 
     </LinearLayout>
 
     <ListView
-        android:id="@+id/goodsListView"
+        android:id="@+id/categoryListView"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_above="@id/footerLayout"

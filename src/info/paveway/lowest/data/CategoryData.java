@@ -1,18 +1,19 @@
 package info.paveway.lowest.data;
 
+
 /**
  * 最低価格
- * 店データ保持クラス
+ * カテゴリデータクラス
  *
  * @version 1.0 新規作成
  *
  */
-public class ShopData extends AbstractBaseData {
+public class CategoryData extends AbstractBaseData {
 
     /**
      * コンストラクタ
      */
-    public ShopData() {
+    public CategoryData() {
         super();
     }
 }

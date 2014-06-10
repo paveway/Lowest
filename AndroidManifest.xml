@@ -25,11 +25,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="info.paveway.lowest.GoodsDetailActivity"
+            android:name="info.paveway.lowest.GoodsListActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
             android:name="info.paveway.lowest.GoodsEditActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="info.paveway.lowest.CategoryListActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
@@ -41,20 +45,20 @@
             android:label="@string/app_name" >
         </activity>
         <activity
+            android:name="info.paveway.lowest.CategoryEditActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="info.paveway.lowest.ShopEditActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
             android:name="com.google.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
 
         <provider
-            android:name="info.paveway.lowest.data.GoodsProvider"
-            android:authorities="info.paveway.lowest.data.goodsprovider"
-            android:exported="false" />
-        <provider
-            android:name="info.paveway.lowest.data.PriceProvider"
-            android:authorities="info.paveway.lowest.data.priceprovider"
-            android:exported="false" />
-        <provider
-            android:name="info.paveway.lowest.data.ShopProvider"
-            android:authorities="info.paveway.lowest.data.shopprovider"
+            android:name="info.paveway.lowest.data.LowestProvider"
+            android:authorities="info.paveway.lowest.data.lowestprovider"
             android:exported="false" />
     </application>
 

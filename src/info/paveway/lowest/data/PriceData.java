@@ -1,6 +1,5 @@
 package info.paveway.lowest.data;
 
-import java.io.Serializable;
 
 /**
  * 最低価格
@@ -9,14 +8,22 @@ import java.io.Serializable;
  * @version 1.0 新規作成
  *
  */
-@SuppressWarnings("serial")
-public class PriceData implements Serializable {
+public class PriceData extends AbstractBaseData {
 
-    /** 価格ID */
-    private int mPriceId;
+    /** カテゴリID */
+    private long mCategoryId;
 
-    /** 品物ID */
-    private int mGoodsId;
+    /** カテゴリ名 */
+    private String mCategoryName;
+
+    /** 商品ID */
+    private long mGoodsId;
+
+    /** 商品名 */
+    private String mGoodsName;
+
+    /** 店ID */
+    private long mShopId;
 
     /** 店名 */
     private String mShopName;
@@ -27,6 +34,9 @@ public class PriceData implements Serializable {
     /** 価格 */
     private long mPrice;
 
+    /** メモ */
+    private String mMemo;
+
     /**
      * コンストラクタ
      */
@@ -35,48 +45,102 @@ public class PriceData implements Serializable {
     }
 
     /**
-     * 価格IDを設定する。
+     * カテゴリIDを設定する。
      *
-     * @param priceId 価格ID
+     * @param categoryId カテゴリID
      */
-    public void setPriceId(int priceId) {
-        mPriceId = priceId;
+    public void setCategoryId(long categoryId) {
+        mCategoryId = categoryId;
     }
 
     /**
-     * 価格IDを返却する。
+     * カテゴリIDを返却する。
      *
-     * @return 価格ID
+     * @return カテゴリID
      */
-    public int getPriceId() {
-        return mPriceId;
+    public long getCagetoryId() {
+        return mCategoryId;
     }
 
     /**
-     * 品物IDを設定する。
+     * カテゴリ名を設定する。
      *
-     * @param goodsId 品物ID
+     * @param categoryName カテゴリ名
      */
-    public void setGoodsId(int goodsId) {
+    public void setCategoryName(String categoryName) {
+        mCategoryName = categoryName;
+    }
+
+    /**
+     * カテゴリ名を返却する。
+     *
+     * @return カテゴリ名
+     */
+    public String getCategoryName() {
+        return mCategoryName;
+    }
+
+    /**
+     * 商品IDを設定する。
+     *
+     * @param goodsId 商品ID
+     */
+    public void setGoodsId(long goodsId) {
         mGoodsId = goodsId;
     }
 
     /**
-     * 品物IDを返却する。
+     * 商品IDを返却する。
      *
-     * @return 品物ID
+     * @return 商品ID
      */
-    public int getGoodsId() {
+    public long getGoodsId() {
         return mGoodsId;
+    }
+
+    /**
+     * 商品名を設定する。
+     *
+     * @param goodsName 商品名
+     */
+    public void setGoodsName(String goodsName) {
+        mGoodsName = goodsName;
+    }
+
+    /**
+     * 商品名を返却する。
+     *
+     * @return 商品名
+     */
+    public String getGoodsName() {
+        return mGoodsName;
+    }
+
+    /**
+     * 店IDを設定する。
+     *
+     * @param shopId 店ID
+     */
+    public void setShopId(long shopId) {
+        mShopId = shopId;
+    }
+
+    /**
+     * 店IDを返却する。
+     *
+     * @return 店ID
+     */
+    public long getShopId() {
+        return mShopId;
     }
 
     /**
      * 店名を設定する。
      *
-     * @param shopId 店名
+     * @param shopName 店名
      */
     public void setShopName(String shopName) {
-    	mShopName = shopName;
+        mShopName = shopName;
     }
 
     /**
@@ -130,10 +194,28 @@ public class PriceData implements Serializable {
      * @return 単価
      */
     public double getUnitPrice() {
-    	if (0 != mQuantity) {
-    		return mPrice / mQuantity;
-    	} else {
-    		return 0;
-    	}
+        if (0 != mQuantity) {
+            return mPrice / mQuantity;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * メモを設定する。
+     *
+     * @param memo メモ
+     */
+    public void setMemo(String memo) {
+        mMemo = memo;
+    }
+
+    /**
+     * メモを返却する。
+     *
+     * @return メモ
+     */
+    public String getMemo() {
+        return mMemo;
     }
 }
