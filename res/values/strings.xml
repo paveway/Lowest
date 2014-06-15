@@ -4,25 +4,34 @@
     <string name="app_name">最低価格</string>
     <string name="main_name">最低価格</string>
     <string name="goods_list_name">商品リスト</string>
-    <string name="goods_detail_name">商品詳細</string>
     <string name="goods_edit_name">商品編集</string>
+    <string name="category_list_name">カテゴリリスト</string>
     <string name="price_edit_name">価格編集</string>
     <string name="shop_list_name">店名リスト</string>
+    <string name="category_edit_name">カテゴリ編集</string>
+    <string name="shop_edit_name">店編集</string>
 
     <string name="action_settings">設定</string>
 
-    <string name="add_button">追加</string>
+    <string name="add_category_button">カテゴリ追加</string>
+    <string name="add_goods_button">商品追加</string>
+    <string name="add_price_button">価格追加</string>
+    <string name="add_shop_button">店追加</string>
     <string name="edit_button">編集</string>
     <string name="delete_button">削除</string>
     <string name="regist_button">登録</string>
     <string name="clear_button">クリア</string>
     <string name="unit_button">単位</string>
+    <string name="category_name_button">カテゴリ名</string>
+    <string name="shop_name_button">店名</string>
 
     <string name="category_name_label">カテゴリ名</string>
     <string name="goods_name_label">商品名</string>
     <string name="quantity_label">数量</string>
     <string name="price_label">価格</string>
     <string name="memo_label">メモ</string>
+    <string name="shop_name_label">店名</string>
+    <string name="unit_price_label">単価</string>
 
     <string name="no_delete_message">このデータは削除できません</string>
 

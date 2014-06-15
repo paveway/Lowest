@@ -1,6 +1,7 @@
 package info.paveway.lowest;
 
 import info.paveway.log.Logger;
+import info.paveway.lowest.CommonConstants.ExtraKey;
 import info.paveway.lowest.data.LowestProvider;
 import info.paveway.lowest.data.LowestProvider.PriceTable;
 import info.paveway.lowest.data.LowestProvider.ShopTable;
@@ -11,13 +12,9 @@ import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.ContentProviderOperation;
-import android.content.ContentProviderResult;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,7 +23,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 
 /**
@@ -38,13 +34,11 @@ import android.widget.ListView;
  */
 public class ShopListActivity extends AbstractBaseActivity {
 
-    private ArrayAdapter<String> mAdapter;
-
     /** 店データリスト */
     private List<ShopData> mShopDataList;
 
-    /** 店名入力 */
-    private EditText mShopNameValue;
+    /** 店リストアダプタ */
+    private ArrayAdapter<String> mShopListAdapter;
 
     /**
      * 生成された時に呼び出される。
@@ -62,21 +56,46 @@ public class ShopListActivity extends AbstractBaseActivity {
         // コンテントリゾルバを取得する。
         mResolver = getContentResolver();
 
-        ((Button)findViewById(R.id.addButton)).setOnClickListener(new ButtonOnClickListener());
+        ((Button)findViewById(R.id.addShopButton)).setOnClickListener(new ButtonOnClickListener());
 
+        // 店データリストを生成する。
         mShopDataList = new ArrayList<ShopData>();
         List<String> shopNameList = getShopNameList();
 
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        // 店リストアダプタを生成する。
+        mShopListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
         for (String shopName : shopNameList) {
-            mAdapter.add(shopName);
+            mShopListAdapter.add(shopName);
         }
+
+        // 店リストビューを生成する。
         ListView shopListView = (ListView)findViewById(R.id.shopListView);
-        shopListView.setAdapter(mAdapter);
+        shopListView.setAdapter(mShopListAdapter);
         shopListView.setOnItemClickListener(new ShopListOnItemClickListener());
         shopListView.setOnItemLongClickListener(new ShopListOnItemLongClickListener());
+    }
 
-        mShopNameValue = new EditText(ShopListActivity.this);
+    /**
+     * リスタートしたときに呼び出される。
+     */
+    @Override
+    protected void onRestart() {
+        // スーパークラスのメソッドを呼び出す。
+        super.onRestart();
+
+        // 店リストアダプタをクリアする。
+        mShopListAdapter.clear();
+
+        // 店名リストを取得する。
+        List<String> shopNameList = getShopNameList();
+
+        // 店リストアダプタに店名を再設定する。
+        for (String shopName : shopNameList) {
+            mShopListAdapter.add(shopName);
+        }
+
+        // 店リストアダプタを更新する。
+        mShopListAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -130,10 +149,14 @@ public class ShopListActivity extends AbstractBaseActivity {
         public void onClick(View v) {
             // ボタンにより処理を判別する。
             switch (v.getId()) {
-            // 追加ボタンの場合
-            case R.id.addButton:
-                // 店名入力ダイアログを表示する。
-                showInputShopNameDialog();
+            // 店追加ボタンの場合
+            case R.id.addShopButton:
+                // 店編集画面を呼び出す。
+                Intent intent = new Intent(ShopListActivity.this, ShopEditActivity.class);
+                ShopData shopData = new ShopData();
+                shopData.setId(-1);
+                intent.putExtra(ExtraKey.SHOP_DATA, shopData);
+                startActivity(intent);
                 break;
 
             // 上記以外
@@ -161,14 +184,8 @@ public class ShopListActivity extends AbstractBaseActivity {
          */
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//            // クリックされた店名を設定する。
-//            mShopNameValue.setText(mShopDataList.get(position).getShopName());
-//
-//            // 店名入力ダイアログを表示する。
-//            showInputShopNameDialog();
-
             Intent intent = new Intent();
-            intent.putExtra("shopName", mShopDataList.get(position).getName());
+            intent.putExtra(ExtraKey.SHOP_DATA, mShopDataList.get(position));
             setResult(RESULT_OK, intent);
             finish();
         }
@@ -243,92 +260,10 @@ public class ShopListActivity extends AbstractBaseActivity {
 
                // バッチ処理を行う。
                try {
-                   ContentProviderResult[] results =
-                           mResolver.applyBatch(LowestProvider.AUTHORITY, operationList);
+                   mResolver.applyBatch(LowestProvider.AUTHORITY, operationList);
                } catch (Exception e) {
                    mLogger.e(e);
                }
-        }
-    }
-
-    /**
-     * 店名入力ダイアログを表示する。
-     */
-    private void showInputShopNameDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ShopListActivity.this);
-        builder.setIcon(android.R.drawable.ic_dialog_info);
-        builder.setTitle("店名入力");
-        builder.setView(mShopNameValue);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // 店データを登録する。
-                registShopData();
-            }
-        });
-        builder.setNegativeButton("キャンセル", null);
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    /**
-     * 店データを登録する。
-     */
-    private void registShopData() {
-        // 入力された店名を取得する。
-        String shopName = mShopNameValue.getText().toString();
-
-        // 店名が入力された場合
-        if ((null != shopName) && !"".equals(shopName)) {
-            // 登録済みかチェックする。
-            boolean exist = false;
-            String selection = ShopTable.NAME + " = ?";
-            String[] selectionArgs = new String[]{shopName};
-            Cursor c = mResolver.query(LowestProvider.SHOP_CONTENT_URI, null, selection, selectionArgs, null);
-            try {
-                // カーソルが取得できた場合
-                if (null != c) {
-                    // データがある場合
-                    if (c.moveToFirst()) {
-                        // 登録済みとする。
-                        exist = true;
-                    }
-                }
-            } finally {
-                if (null != c) {
-                    c.close();
-                }
-            }
-
-            // 登録済みの場合
-            if (exist) {
-                toast("登録済みです");
-
-            // 未登録の場合
-            } else {
-                // 店名を登録する。
-                ContentValues values = new ContentValues();
-                values.put(ShopTable.NAME, shopName);
-                Uri result = mResolver.insert(LowestProvider.SHOP_CONTENT_URI, values);
-                // 登録できた場合
-                if (null != result) {
-                    toast("店名を登録しました");
-                    mAdapter.add(shopName);
-                    ShopData shopData = new ShopData();
-                    shopData.setId(ContentUris.parseId(result));
-                    shopData.setName(shopName);
-                    mShopDataList.add(shopData);
-                    mAdapter.notifyDataSetChanged();
-
-                // 登録できなかった場合
-                } else {
-                    toast("店名を登録できませんでした");
-                }
-            }
-
-        // 未入力の場合
-        } else {
-            toast("店名を入力して下さい");
         }
     }
 }

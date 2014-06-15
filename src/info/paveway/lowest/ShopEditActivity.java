@@ -1,11 +1,10 @@
 package info.paveway.lowest;
 
 import info.paveway.lowest.CommonConstants.ExtraKey;
-import info.paveway.lowest.data.CategoryData;
 import info.paveway.lowest.data.LowestProvider;
-import info.paveway.lowest.data.LowestProvider.CategoryTable;
-import info.paveway.lowest.data.LowestProvider.GoodsTable;
 import info.paveway.lowest.data.LowestProvider.PriceTable;
+import info.paveway.lowest.data.LowestProvider.ShopTable;
+import info.paveway.lowest.data.ShopData;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,18 +24,18 @@ import android.widget.EditText;
 
 /**
  * 最低価格
- * カテゴリ編集画面
+ * 店編集画面
  *
  * @version 1.0 新規作成
  *
  */
-public class CategoryEditActivity extends AbstractBaseActivity {
+public class ShopEditActivity extends AbstractBaseActivity {
 
-    /** カテゴリ名 */
-    private EditText mCategoryNameValue;
+    /** 店名 */
+    private EditText mShopNameValue;
 
-    /** カテゴリデータ */
-    private CategoryData mCategoryData;
+    /** 店データ */
+    private ShopData mShopData;
 
     /**
      * 生成された時に呼び出される。
@@ -49,7 +48,7 @@ public class CategoryEditActivity extends AbstractBaseActivity {
         super.onCreate(savedInstanceState);
 
         // レイアウトを設定する。
-        setContentView(R.layout.activity_category_edit);
+        setContentView(R.layout.activity_shop_edit);
 
         // インテントを取得する。
         Intent intent = getIntent();
@@ -62,9 +61,9 @@ public class CategoryEditActivity extends AbstractBaseActivity {
         }
 
         // 引継ぎデータを取得する。
-        mCategoryData = (CategoryData)intent.getSerializableExtra(ExtraKey.CATEGORY_DATA);
+        mShopData = (ShopData)intent.getSerializableExtra(ExtraKey.SHOP_DATA);
         // 引継ぎデータが取得できない場合
-        if (null == mCategoryData) {
+        if (null == mShopData) {
             // 終了する。
             toast(R.string.illeagal_transition);
             finish();
@@ -77,20 +76,20 @@ public class CategoryEditActivity extends AbstractBaseActivity {
         deleteButton.setOnClickListener(new ButtonOnClickListener());
         ((Button)findViewById(R.id.clearButton)).setOnClickListener(new ButtonOnClickListener());
 
-        mCategoryNameValue = (EditText)findViewById(R.id.categoryNameValue);
+        mShopNameValue = (EditText)findViewById(R.id.shopNameValue);
 
-        // カテゴリ名を取得する。
-        String categoryName = mCategoryData.getName();
+        // 店名を取得する。
+        String shopName = mShopData.getName();
 
         // 追加の場合
-        if (StringUtil.isNullOrEmpty(categoryName)) {
+        if (StringUtil.isNullOrEmpty(shopName)) {
             // 削除ボタンを無効にする。
             deleteButton.setEnabled(false);
 
         // 編集の場合
         } else {
-            // カテゴリ名を設定する。
-            mCategoryNameValue.setText(categoryName);
+            // 店名を設定する。
+            mShopNameValue.setText(shopName);
         }
 
     }
@@ -113,19 +112,19 @@ public class CategoryEditActivity extends AbstractBaseActivity {
             // 登録ボタンの場合
             case R.id.registButton:
                 // 入力値を取得する。
-                String categoryName = mCategoryNameValue.getText().toString();
+                String shopName = mShopNameValue.getText().toString();
 
                 // 未入力かチェックする。
-                if (StringUtil.isNullOrEmpty(categoryName)) {
+                if (StringUtil.isNullOrEmpty(shopName)) {
                     toast("カテゴリ名が未入力です");
                     return;
                 }
 
                 // 登録済みかチェックする。
                 {
-                    String selection = CategoryTable.NAME + " = ?";
-                    String[] selectionArgs = {categoryName};
-                    Cursor c = mResolver.query(LowestProvider.CATEGORY_CONTENT_URI, null, selection, selectionArgs, null);
+                    String selection = ShopTable.NAME + " = ?";
+                    String[] selectionArgs = {shopName};
+                    Cursor c = mResolver.query(LowestProvider.SHOP_CONTENT_URI, null, selection, selectionArgs, null);
                     try {
                         if (null != c) {
                             if (c.moveToFirst()) {
@@ -138,15 +137,15 @@ public class CategoryEditActivity extends AbstractBaseActivity {
                     }
                 }
 
-                // カテゴリを登録する。
+                // 店を登録する。
                 long updateTime = new Date().getTime();
                 ContentValues values = new ContentValues();
-                values.put(CategoryTable.NAME, categoryName);
-                values.put(CategoryTable.UPDATE_TIME, updateTime);
+                values.put(ShopTable.NAME, shopName);
+                values.put(ShopTable.UPDATE_TIME, updateTime);
 
                 // 新規登録の場合
-                if (-1 == mCategoryData.getId()) {
-                    Uri result = mResolver.insert(LowestProvider.CATEGORY_CONTENT_URI, values);
+                if (-1 == mShopData.getId()) {
+                    Uri result = mResolver.insert(LowestProvider.SHOP_CONTENT_URI, values);
 
                     // エラーの場合
                     if (null == result) {
@@ -156,9 +155,9 @@ public class CategoryEditActivity extends AbstractBaseActivity {
 
                 // 更新の場合
                 } else {
-                    String selection = CategoryTable.ID + " = ?";
-                    String[] selectionArgs = {String.valueOf(mCategoryData.getId())};
-                    int result = mResolver.update(LowestProvider.CATEGORY_CONTENT_URI, values, selection, selectionArgs);
+                    String selection = ShopTable.ID + " = ?";
+                    String[] selectionArgs = {String.valueOf(mShopNameValue.getId())};
+                    int result = mResolver.update(LowestProvider.SHOP_CONTENT_URI, values, selection, selectionArgs);
                     if (1 != result) {
                         toast("更新に失敗しました");
                     }
@@ -171,7 +170,7 @@ public class CategoryEditActivity extends AbstractBaseActivity {
             // 削除ボタンの場合
             case R.id.deleteButton:
                 // 削除確認ダイアログを表示する。
-                AlertDialog.Builder builder = new AlertDialog.Builder(CategoryEditActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(ShopEditActivity.this);
                 builder.setTitle(R.string.delete_dialog_title);
                 builder.setMessage(R.string.delete_dialog_message);
                 builder.setIcon(android.R.drawable.ic_dialog_alert);
@@ -185,7 +184,7 @@ public class CategoryEditActivity extends AbstractBaseActivity {
 
             // クリアボタンの場合
             case R.id.clearButton:
-                mCategoryNameValue.setText("");
+                mShopNameValue.setText("");
                 break;
             }
         }
@@ -208,77 +207,27 @@ public class CategoryEditActivity extends AbstractBaseActivity {
                         new ArrayList<ContentProviderOperation>();
                 ContentProviderOperation.Builder builder = null;
 
-                // カテゴリテーブルのデータを削除する。
+                // 店テーブルのデータを削除する。
                 {
-                    builder = ContentProviderOperation.newDelete(LowestProvider.CATEGORY_CONTENT_URI);
-                    String selection = CategoryTable.ID + " = ?";
-                    String[] selectionArgs = {String.valueOf(mCategoryData.getId())};
+                    builder = ContentProviderOperation.newDelete(LowestProvider.SHOP_CONTENT_URI);
+                    String selection = ShopTable.ID + " = ?";
+                    String[] selectionArgs = {String.valueOf(mShopNameValue.getId())};
                     builder.withSelection(selection, selectionArgs);
                     operationList.add(builder.build());
                 }
 
-                // 更新日時を取得する。
-                long updateTime = new Date().getTime();
-
-                // 商品テーブルのデータで該当カテゴリのデータをカテゴリ無に更新する。
+                // 価格テーブルのデータで該当の店データを削除する。
                 {
-                    // 商品テーブルの該当カテゴリのデータを検索する。
-                    String selection = GoodsTable.CATEGORY_ID + " = ?";
-                    String[] selectionArgs = {String.valueOf(mCategoryData.getId())};
-                    Cursor c =
-                            getContentResolver().query(
-                                    LowestProvider.GOODS_CONTENT_URI, null, selection, selectionArgs, null);
-
-                    // カーソルが取得できた場合
-                    if (null != c) {
-                        // カーソルを先頭に移動できた場合
-                        if (c.moveToFirst()) {
-                            // データがある間繰り返す。
-                            do {
-                                builder = ContentProviderOperation.newUpdate(LowestProvider.GOODS_CONTENT_URI);
-                                String updateSelection = GoodsTable.ID + " = ?";
-                                String[] updateSelectionArgs = {String.valueOf(c.getLong(c.getColumnIndex(GoodsTable.ID)))};
-                                builder.withSelection(updateSelection, updateSelectionArgs);
-                                builder.withValue(GoodsTable.CATEGORY_ID, 0);
-                                builder.withValue(GoodsTable.CATEGORY_NAME, LowestProvider.CATEGORY_NAME_DEFAULT_VALUE);
-                                builder.withValue(GoodsTable.UPDATE_TIME, updateTime);
-                                operationList.add(builder.build());
-                            } while (c.moveToNext());
-                        }
-                    }
-                }
-
-                // 価格テーブルのデータで該当カテゴリのデータをカテゴリ無に更新する。
-                {
-                    // 価格テーブルの該当カテゴリのデータを検索する。
-                    String selection = PriceTable.CATEGORY_ID + " = ?";
-                    String[] selectionArgs = {String.valueOf(mCategoryData.getId())};
-                    Cursor c =
-                            getContentResolver().query(
-                                    LowestProvider.PRICE_CONTENT_URI, null, selection, selectionArgs, null);
-
-                    // カーソルが取得できた場合
-                    if (null != c) {
-                        // カーソルを先頭に移動できた場合
-                        if (c.moveToFirst()) {
-                            // データがある間繰り返す。
-                            do {
-                                builder = ContentProviderOperation.newUpdate(LowestProvider.PRICE_CONTENT_URI);
-                                String updateSelection = PriceTable.ID + " = ?";
-                                String[] updateSelectionArgs = {String.valueOf(c.getLong(c.getColumnIndex(PriceTable.ID)))};
-                                builder.withSelection(updateSelection, updateSelectionArgs);
-                                builder.withValue(PriceTable.CATEGORY_ID, 0);
-                                builder.withValue(PriceTable.CATEGORY_NAME, LowestProvider.CATEGORY_NAME_DEFAULT_VALUE);
-                                builder.withValue(PriceTable.UPDATE_TIME, updateTime);
-                                operationList.add(builder.build());
-                            } while (c.moveToNext());
-                        }
-                    }
+                    builder = ContentProviderOperation.newDelete(LowestProvider.PRICE_CONTENT_URI);
+                    String selection = PriceTable.SHOP_ID + " = ?";
+                    String[] selectionArgs = {String.valueOf(mShopNameValue.getId())};
+                    builder.withSelection(selection, selectionArgs);
+                    operationList.add(builder.build());
                 }
 
                 // バッチ処理を行う。
                 try {
-                        mResolver.applyBatch(LowestProvider.AUTHORITY, operationList);
+                    mResolver.applyBatch(LowestProvider.AUTHORITY, operationList);
                 } catch (Exception e) {
                     toast("削除に失敗しました");
                 }

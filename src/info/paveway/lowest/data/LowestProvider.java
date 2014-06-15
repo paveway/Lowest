@@ -677,7 +677,7 @@ public class LowestProvider extends ContentProvider {
 
         /** カテゴリテーブル生成SQL */
         private static final String CREATE_CATEGORY_TABLE_SQL =
-                "CREATE TABLE " + TableName.CATEGORY +
+                "CREATE TABLE IF NOT EXISTS " + TableName.CATEGORY +
                 " (" +
                     CategoryTable.ID          + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     CategoryTable.NAME        + " TEXT, "    +
@@ -686,7 +686,7 @@ public class LowestProvider extends ContentProvider {
 
         /** 商品テーブル生成SQL */
         private static final String CREATE_GOODS_TABLE_SQL =
-                "CREATE TABLE " + TableName.GOODS +
+                "CREATE TABLE IF NOT EXISTS " + TableName.GOODS +
                 " (" +
                     GoodsTable.ID            + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     GoodsTable.NAME          + " TEXT, "    +
@@ -698,7 +698,7 @@ public class LowestProvider extends ContentProvider {
 
         /** 店テーブル生成SQL */
         private static final String CREATE_SHOP_TABLE_SQL =
-                "CREATE TABLE " + TableName.SHOP +
+                "CREATE TABLE IF NOT EXISTS " + TableName.SHOP +
                 " (" +
                     ShopTable.ID          + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     ShopTable.NAME        + " TEXT, "    +
@@ -707,7 +707,7 @@ public class LowestProvider extends ContentProvider {
 
         /** 価格テーブル生成SQL */
         private static final String CREATE_PRICE_TABLE_SQL =
-                "CREATE TABLE " + TableName.PRICE +
+                "CREATE TABLE IF NOT EXISTS " + TableName.PRICE +
                 " (" +
                     PriceTable.ID            + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     PriceTable.CATEGORY_ID   + " INTEGER, " +
@@ -751,11 +751,11 @@ public class LowestProvider extends ContentProvider {
             db.beginTransaction();
 
             try {
-                // 既存のテーブルを削除する。
-                db.execSQL(DROP_CATEGORY_TABLE_SQL);
-                db.execSQL(DROP_GOODS_TABLE_SQL);
-                db.execSQL(DROP_SHOP_TABLE_SQL);
-                db.execSQL(DROP_PRICE_TABLE_SQL);
+//                // 既存のテーブルを削除する。
+//                db.execSQL(DROP_CATEGORY_TABLE_SQL);
+//                db.execSQL(DROP_GOODS_TABLE_SQL);
+//                db.execSQL(DROP_SHOP_TABLE_SQL);
+//                db.execSQL(DROP_PRICE_TABLE_SQL);
 
                 // 新規にテーブルを生成する。
                 db.execSQL(CREATE_CATEGORY_TABLE_SQL);

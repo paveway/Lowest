@@ -1,6 +1,5 @@
 package info.paveway.lowest;
 
-import info.paveway.log.Logger;
 import info.paveway.lowest.CommonConstants.ExtraKey;
 import info.paveway.lowest.data.CategoryData;
 import info.paveway.lowest.data.GoodsData;
@@ -14,7 +13,6 @@ import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.ContentProviderOperation;
-import android.content.ContentProviderResult;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -88,7 +86,8 @@ public class GoodsListActivity extends AbstractBaseActivity {
         mGoodsDataList = getGoodsDataList();
 
         // 各ウィジットを設定する。
-        ((Button)findViewById(R.id.addButton)).setOnClickListener(new ButtonOnClickListener());
+        ((Button)findViewById(R.id.addGoodsButton)).setOnClickListener(new ButtonOnClickListener());
+        ((TextView)findViewById(R.id.categoryNameValue)).setText(mCategoryData.getName());
 
         // 商品リストビューを設定する。
         mGoodsListAdapter = new GoodsListAdapter(GoodsListActivity.this, 0, mGoodsDataList);
@@ -257,11 +256,11 @@ public class GoodsListActivity extends AbstractBaseActivity {
             // リストに設定されるビューが無い場合
             if (null == convertView) {
                 // 新しく生成する。
-                convertView = mLayoutInflater.inflate(R.layout.price_list_row, null);
+                convertView = mLayoutInflater.inflate(R.layout.goods_list_row, null);
             }
 
             // 各ウィジットを設定する。
-            TextView goodsNameValue = (TextView)convertView.findViewById(R.id.cateogryNameValue);
+            TextView goodsNameValue = (TextView)convertView.findViewById(R.id.goodsNameValue);
             TextView unitPriceValue = (TextView)convertView.findViewById(R.id.unitPriceValue);
             TextView shopNameValue  = (TextView)convertView.findViewById(R.id.shopNameValue);
 
@@ -273,6 +272,41 @@ public class GoodsListActivity extends AbstractBaseActivity {
             }
 
             return convertView;
+        }
+    }
+
+    /**************************************************************************/
+    /**
+     * ボタンクリックリスナークラス
+     *
+     */
+    private class ButtonOnClickListener implements OnClickListener {
+
+        /**
+         * ボタンがクリックされた時に呼び出される。
+         *
+         * @param v クリックされたボタン
+         */
+        @Override
+        public void onClick(View v) {
+            // ボタンにより処理を判別する。
+            switch (v.getId()) {
+            // 商品追加ボタンの場合
+            case R.id.addGoodsButton:
+                // 商品編集画面を呼び出す。
+                Intent intent = new Intent(GoodsListActivity.this, GoodsEditActivity.class);
+                GoodsData goodsData = new GoodsData();
+                goodsData.setCategoryId(  mCategoryData.getId());
+                goodsData.setCategoryName(mCategoryData.getName());
+                intent.putExtra(ExtraKey.GOODS_DATA, goodsData);
+                startActivity(intent);
+                break;
+
+            // 上記以外
+            default:
+                // 何もしない。
+                break;
+            }
         }
     }
 
@@ -343,9 +377,6 @@ public class GoodsListActivity extends AbstractBaseActivity {
          */
         private class ButtonOnClickListener implements DialogInterface.OnClickListener {
 
-            /** ロガー */
-            private Logger mLogger = new Logger(ButtonOnClickListener.class);
-
             /**
              * ボタンがクリックされた時に呼び出される。
              *
@@ -385,8 +416,7 @@ public class GoodsListActivity extends AbstractBaseActivity {
 
                 // バッチ処理を行う。
                 try {
-                    ContentProviderResult[] results =
-                        mResolver.applyBatch(LowestProvider.AUTHORITY, operationList);
+                    mResolver.applyBatch(LowestProvider.AUTHORITY, operationList);
                 } catch (Exception e) {
                     toast("削除に失敗しました");
                     return;
@@ -397,41 +427,6 @@ public class GoodsListActivity extends AbstractBaseActivity {
                 mGoodsListAdapter.clear();
                 mGoodsListAdapter.addAll(mGoodsDataList);
                 mGoodsListAdapter.notifyDataSetChanged();
-            }
-        }
-    }
-
-    /**************************************************************************/
-    /**
-     * ボタンクリックリスナークラス
-     *
-     */
-    private class ButtonOnClickListener implements OnClickListener {
-
-        /**
-         * ボタンがクリックされた時に呼び出される。
-         *
-         * @param v クリックされたボタン
-         */
-        @Override
-        public void onClick(View v) {
-            // ボタンにより処理を判別する。
-            switch (v.getId()) {
-            // 追加ボタンの場合
-            case R.id.addButton:
-                // 商品編集画面を呼び出す。
-                Intent intent = new Intent(GoodsListActivity.this, GoodsEditActivity.class);
-                GoodsData goodsData = new GoodsData();
-                goodsData.setCategoryId(  mCategoryData.getId());
-                goodsData.setCategoryName(mCategoryData.getName());
-                intent.putExtra(ExtraKey.GOODS_DATA, goodsData);
-                startActivity(intent);
-                break;
-
-            // 上記以外
-            default:
-                // 何もしない。
-                break;
             }
         }
     }

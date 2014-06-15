@@ -31,7 +31,7 @@ import android.widget.ListView;
 public class MainActivity extends AbstractBaseActivity {
 
     /** カテゴリデータリスト */
-    private List<CategoryData> mCategoryDataList;
+    protected List<CategoryData> mCategoryDataList;
 
     /** カテゴリリストアダプタ */
     private ArrayAdapter<String> mCategoryListAdapter;
@@ -59,13 +59,27 @@ public class MainActivity extends AbstractBaseActivity {
         }
 
         // 各ウィジットを設定する。
-        ((Button)findViewById(R.id.addButton)).setOnClickListener(new ButtonOnClickListener());
+        ((Button)findViewById(R.id.addCategoryButton)).setOnClickListener(new ButtonOnClickListener());
 
         // カテゴリリストビューを設定する。
         mCategoryListAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, categoryNameList);
         ListView categoryListView = (ListView)findViewById(R.id.categoryListView);
         categoryListView.setAdapter(mCategoryListAdapter);
-        categoryListView.setOnItemClickListener(new CategoryListOnItemClickListener());
+        categoryListView.setOnItemClickListener(new OnItemClickListener() {
+            /**
+             * リストアイテムがクリックされた時に呼び出される。
+             *
+             * @param parent 親のビュー
+             * @param view 対象のビュー
+             * @param position リストの位置
+             * @param id 対象のビューのID
+             */
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // リストアイテムがクリックされた時の処理を行う。
+                itemClick(parent, view, position, id);
+            }
+        });
         categoryListView.setOnItemLongClickListener(new CategoryListOnItemLongClickListener());
     }
 
@@ -138,27 +152,53 @@ public class MainActivity extends AbstractBaseActivity {
         return categoryDataList;
     }
 
+    /**
+     * リストアイテムがクリックされた時に呼び出される。
+     * サブクラスでオーバーライドする。
+     *
+     * @param parent 親のビュー
+     * @param view 対象のビュー
+     * @param position リストの位置
+     * @param id 対象のビューのID
+     */
+    protected void itemClick(AdapterView<?> parent, View view, int position, long id) {
+        // 商品リスト画面を呼び出す。
+        Intent intent = new Intent(MainActivity.this, GoodsListActivity.class);
+        intent.putExtra(ExtraKey.CATEGORY_DATA, mCategoryDataList.get(position));
+        startActivity(intent);
+    }
+
     /**************************************************************************/
     /**
-     * カテゴリリストアイテムクリックリスナークラス
+     * ボタンクリックリスナークラス
      *
      */
-    private class CategoryListOnItemClickListener implements OnItemClickListener {
+    private class ButtonOnClickListener implements OnClickListener {
 
         /**
-         * リストアイテムがクリックされた時に呼び出される。
+         * ボタンがクリックされた時に呼び出される。
          *
-         * @param parent 親のビュー
-         * @param view 対象のビュー
-         * @param position リストの位置
-         * @param id 対象のビューのID
+         * @param v クリックされたボタン
          */
         @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            // 商品リスト画面に遷移する。
-            Intent intent = new Intent(MainActivity.this, GoodsListActivity.class);
-            intent.putExtra(ExtraKey.CATEGORY_DATA, mCategoryDataList.get(position));
-            startActivity(intent);
+        public void onClick(View v) {
+            // ボタンにより処理を判別する。
+            switch (v.getId()) {
+            // カテゴリ追加ボタンの場合
+            case R.id.addCategoryButton:
+                // カテゴリ編集画面を呼び出す。
+                Intent intent = new Intent(MainActivity.this, CategoryEditActivity.class);
+                CategoryData categoryData = new CategoryData();
+                categoryData.setId(-1);
+                intent.putExtra(ExtraKey.CATEGORY_DATA, categoryData);
+                startActivity(intent);
+                break;
+
+            // 上記以外
+            default:
+                // 何もしない。
+                break;
+            }
         }
     }
 
@@ -194,40 +234,6 @@ public class MainActivity extends AbstractBaseActivity {
             }
 
             return true;
-        }
-    }
-
-    /**************************************************************************/
-    /**
-     * ボタンクリックリスナークラス
-     *
-     */
-    private class ButtonOnClickListener implements OnClickListener {
-
-        /**
-         * ボタンがクリックされた時に呼び出される。
-         *
-         * @param v クリックされたボタン
-         */
-        @Override
-        public void onClick(View v) {
-            // ボタンにより処理を判別する。
-            switch (v.getId()) {
-            // 追加ボタンの場合
-            case R.id.addButton:
-                // カテゴリ編集画面を呼び出す。
-                Intent intent = new Intent(MainActivity.this, CategoryEditActivity.class);
-                CategoryData categoryData = new CategoryData();
-                categoryData.setId(-1);
-                intent.putExtra(ExtraKey.CATEGORY_DATA, categoryData);
-                startActivity(intent);
-                break;
-
-            // 上記以外
-            default:
-                // 何もしない。
-                break;
-            }
         }
     }
 }

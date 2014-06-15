@@ -41,7 +41,7 @@ public class CommonConstants {
         public static final String GOODS_DATA = "goodsData";
 
         /** 店データ */
-        public static final String SPOP_DATA = "shopData";
+        public static final String SHOP_DATA = "shopData";
 
         /** 価格データ */
         public static final String PRICE_DATA = "priceData";

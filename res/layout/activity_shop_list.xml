@@ -12,16 +12,16 @@
     tools:context=".MainActivity" >
 
     <RelativeLayout
-        android:id="@+id/headerLayout"
+        android:id="@+id/buttonLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <Button
-            android:id="@+id/addButton"
+            android:id="@+id/addShopButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:text="@string/add_button" />
+            android:text="@string/add_shop_button" />
 
     </RelativeLayout>
 
@@ -40,7 +40,7 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_above="@id/footerLayout"
-        android:layout_below="@id/headerLayout" >
+        android:layout_below="@id/buttonLayout" >
 
     </ListView>
 

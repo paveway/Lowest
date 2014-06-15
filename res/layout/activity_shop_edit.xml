@@ -53,14 +53,14 @@
                 android:layout_height="wrap_content" >
 
                 <TextView
-                    android:id="@+id/categoryNameLabel"
+                    android:id="@+id/shopNameLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="20sp"
-                    android:text="@string/category_name_label" />
+                    android:text="@string/shop_name_label" />
 
                 <EditText
-                    android:id="@+id/categoryNameValue"
+                    android:id="@+id/shopNameValue"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"

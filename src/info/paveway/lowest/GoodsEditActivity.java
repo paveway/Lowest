@@ -1,12 +1,15 @@
 package info.paveway.lowest;
 
 import info.paveway.lowest.CommonConstants.ExtraKey;
+import info.paveway.lowest.CommonConstants.RequestCode;
+import info.paveway.lowest.data.CategoryData;
 import info.paveway.lowest.data.GoodsData;
 import info.paveway.lowest.data.LowestProvider;
 import info.paveway.lowest.data.LowestProvider.GoodsTable;
 import info.paveway.lowest.data.LowestProvider.PriceTable;
 import info.paveway.lowest.data.PriceData;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,6 +19,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -43,14 +47,20 @@ public class GoodsEditActivity extends AbstractBaseActivity {
     /** 商品データ */
     private GoodsData mGoodsData;
 
+    /** カテゴリ名 */
+    private TextView mCategoryNameValue;
+
     /** 商品名 */
     private EditText mGoodsNameValue;
 
     /** メモ */
     private EditText mMemoValue;
 
-    /** 追加ボタン */
-    private Button mAddButton;
+    /** 価格追加ボタン */
+    private Button mAddPriceButton;
+
+    /** 価格データリスト */
+    private List<PriceData> mPriceDataList;
 
     /** 価格リストアダプタ */
     private PriceListAdapter mPriceListAdapter;
@@ -88,14 +98,18 @@ public class GoodsEditActivity extends AbstractBaseActivity {
             return;
         }
 
+        // 価格データリストを取得する。
+        mPriceDataList = getPriceDataList();
+
         // 各ウィジットを設定する。
         ((Button)findViewById(R.id.registButton)      ).setOnClickListener(new ButtonOnClickListener());
         ((Button)findViewById(R.id.clearButton)       ).setOnClickListener(new ButtonOnClickListener());
-        mAddButton = (Button)findViewById(R.id.addButton);
-        mAddButton.setOnClickListener(new ButtonOnClickListener());
+        ((Button)findViewById(R.id.categoryNameButton)).setOnClickListener(new ButtonOnClickListener());
+        mAddPriceButton = (Button)findViewById(R.id.addPriceButton);
+        mAddPriceButton.setOnClickListener(new ButtonOnClickListener());
 
-        TextView categoryNameValue = (TextView)findViewById(R.id.categoryNameValue);
-        categoryNameValue.setText(mGoodsData.getCategoryName());
+        mCategoryNameValue = (TextView)findViewById(R.id.categoryNameValue);
+        mCategoryNameValue.setText(mGoodsData.getCategoryName());
 
         mGoodsNameValue = (EditText)findViewById(R.id.cateogryNameValue);
         mMemoValue      = (EditText)findViewById(R.id.memoValue);
@@ -107,12 +121,12 @@ public class GoodsEditActivity extends AbstractBaseActivity {
             mMemoValue.setText(mGoodsData.getMemo());
 
             // 追加ボタンを有効にする。
-            mAddButton.setEnabled(true);
+            mAddPriceButton.setEnabled(true);
 
         // 商品データ新規登録の場合
         } else {
             // 追加ボタンを無効にする。
-            mAddButton.setEnabled(false);
+            mAddPriceButton.setEnabled(false);
         }
 
         // 価格リストビューを設定する。
@@ -121,8 +135,92 @@ public class GoodsEditActivity extends AbstractBaseActivity {
         priceListView.setOnItemLongClickListener(new PriceListOnItemLongClickListener());
 
         // 価格リストを設定する。
-        mPriceListAdapter =  new PriceListAdapter(GoodsEditActivity.this, 0, mGoodsData.getPriceDataList());
+        mPriceListAdapter =  new PriceListAdapter(GoodsEditActivity.this, 0, mPriceDataList);
         priceListView.setAdapter(mPriceListAdapter);
+    }
+
+    /**
+     * リスタートしたときに呼び出される。
+     */
+    @Override
+    protected void onRestart() {
+        // スーパークラスのメソッドを呼び出す。
+        super.onRestart();
+
+        // 価格リストアダプタをクリアする。
+        mPriceListAdapter.clear();
+
+        // 価格データリストを再取得する。
+        mPriceDataList = getPriceDataList();
+
+        // 価格リストアダプタに価格データリストを再設定する。
+        mPriceListAdapter.addAll(mPriceDataList);
+
+        // 価格リストアダプタを更新する。
+        mPriceListAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 他の画面の呼び出しから戻った時に呼び出される。
+     *
+     * @param requestCode 要求コード
+     * @param resultCode 結果コード
+     * @param data データ
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if ((RequestCode.CATEGORY_LIST == requestCode) && (RESULT_OK == resultCode)) {
+            CategoryData categoryData = (CategoryData)data.getSerializableExtra(ExtraKey.CATEGORY_DATA);
+            if (null != categoryData) {
+                mGoodsData.setCategoryId(categoryData.getId());
+                String categoryName = categoryData.getName();
+                mGoodsData.setCategoryName(categoryName);
+                mCategoryNameValue.setText(categoryName);
+            }
+        }
+    }
+
+    /**
+     * 価格データリストを取得する。
+     *
+     * @return 価格データリスト
+     */
+    private List<PriceData> getPriceDataList() {
+        List<PriceData> priceDataList = new ArrayList<PriceData>();
+        long goodsId = mGoodsData.getId();
+        String selection = PriceTable.GOODS_ID + " = ?";
+        String[] selectionArgs = new String[]{String.valueOf(goodsId)};
+        Cursor c = mResolver.query(LowestProvider.PRICE_CONTENT_URI, null, selection, selectionArgs, null);
+        try {
+            // カーソルが取得できた場合
+            if (null != c) {
+                // データがある場合
+                if (c.moveToFirst()) {
+                    do {
+                        // 価格データを生成し、データを設定する。
+                        PriceData priceData = new PriceData();
+                        priceData.setId(          c.getLong(  c.getColumnIndex(PriceTable.ID)));
+                        priceData.setCategoryId(  mGoodsData.getCategoryId());
+                        priceData.setCategoryName(mGoodsData.getCategoryName());
+                        priceData.setGoodsId(     goodsId);
+                        priceData.setGoodsName(   mGoodsData.getName());
+                        priceData.setShopId(      c.getLong(  c.getColumnIndex(PriceTable.SHOP_ID)));
+                        priceData.setShopName(    c.getString(c.getColumnIndex(PriceTable.SHOP_NAME)));
+                        priceData.setQuantity(    c.getDouble(c.getColumnIndex(PriceTable.QUANTITY)));
+                        priceData.setPrice(       c.getLong(  c.getColumnIndex(PriceTable.PRICE)));
+                        priceData.setUpdateTime(  c.getLong(  c.getColumnIndex(PriceTable.UPDATE_TIME)));
+
+                        priceDataList.add(priceData);
+                    } while (c.moveToNext());
+                }
+            }
+        } finally {
+            if (null != c) {
+                c.close();
+            }
+        }
+
+        return priceDataList;
     }
 
     /**************************************************************************/
@@ -171,109 +269,12 @@ public class GoodsEditActivity extends AbstractBaseActivity {
             TextView priceValue     = (TextView)convertView.findViewById(R.id.priceValue);
             TextView unitPriceValue = (TextView)convertView.findViewById(R.id.unitPriceValue);
 
-            shopNameValue.setText(                priceData.getName());
+            shopNameValue.setText(                priceData.getShopName());
             quantityValue.setText( String.valueOf(priceData.getQuantity()));
             priceValue.setText(    String.valueOf(priceData.getPrice()));
             unitPriceValue.setText(String.valueOf(priceData.getUnitPrice()));
 
             return convertView;
-        }
-    }
-
-    /**************************************************************************/
-    /**
-     * 価格リストアイテムクリックリスナークラス
-     *
-     */
-    private class PriceListOnItemClickListener implements OnItemClickListener {
-
-        /**
-         * リストアイテムがクリックされた時に呼び出される。
-         *
-         * @param parent 親のビュー
-         * @param view 対象のビュー
-         * @param position リストの位置
-         * @param id 対象のビューのID
-         */
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            // 価格編集画面に遷移する。
-            Intent intent = new Intent(GoodsEditActivity.this, PriceEditActivity.class);
-            intent.putExtra(ExtraKey.PRICE_DATA, mGoodsData.getPriceDataList().get(position));
-            startActivity(intent);
-        }
-    }
-
-    /**************************************************************************/
-    /**
-     * 価格リストアイテムロングクリックリスナークラス
-     *
-     */
-    private class PriceListOnItemLongClickListener implements OnItemLongClickListener {
-
-        /** 価格アイテムの位置 */
-        private int mPosition;
-
-        /**
-         * リストアイテムがロングクリックされた時に呼び出される。
-         *
-         * @param parent 親のビュー
-         * @param view 対象のビュー
-         * @param position リストの位置
-         * @param id 対象のビューのID
-         * @return 処理結果
-         */
-        @Override
-        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            mPosition = position;
-
-            // 価格アイテム削除確認ダイアログを表示する。
-            AlertDialog.Builder builder = new AlertDialog.Builder(GoodsEditActivity.this);
-            builder.setTitle(R.string.delete_dialog_title);
-            builder.setMessage(R.string.delete_dialog_message);
-            builder.setIcon(android.R.drawable.ic_dialog_alert);
-            builder.setPositiveButton(R.string.delete_dialog_positive_button, new ButtonOnClickListener());
-            builder.setNegativeButton(R.string.delete_dialog_negative_button, null);
-            builder.setCancelable(true);
-            AlertDialog dialog = builder.create();
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.show();
-            return true;
-        }
-
-        /**
-         * ボタンクリックリスナークラス
-         */
-        private class ButtonOnClickListener implements DialogInterface.OnClickListener {
-
-            /**
-             * ボタンがクリックされた時に呼び出される。
-             *
-             * @param dialog ダイアログ
-             * @param which クリックされたボタン
-             */
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // 価格データを取得する。
-                List<PriceData> priceDataList = mGoodsData.getPriceDataList();
-                PriceData priceData = priceDataList.get(mPosition);
-
-                String selection = PriceTable.ID + " = ?";
-                String[] selectionArgs = {String.valueOf(priceData.getId())};
-                int result = mResolver.delete(LowestProvider.PRICE_CONTENT_URI, selection, selectionArgs);
-
-                // 削除に失敗した場合
-                if (1 != result) {
-                    toast(R.string.pricedata_delete_error);
-
-                } else {
-                    // リストビューの内容を更新する。
-                    priceDataList.remove(mPosition);
-                    mPriceListAdapter.clear();
-                    mPriceListAdapter.addAll(priceDataList);
-                    mPriceListAdapter.notifyDataSetChanged();
-                }
-            }
         }
     }
 
@@ -333,7 +334,7 @@ public class GoodsEditActivity extends AbstractBaseActivity {
                         mGoodsData.setUpdateTime(updateTime);
 
                         // 追加ボタンを有効にする。
-                        mAddButton.setEnabled(true);
+                        mAddPriceButton.setEnabled(true);
                     }
 
                 // 登録済みの場合
@@ -352,7 +353,7 @@ public class GoodsEditActivity extends AbstractBaseActivity {
                         mGoodsData.setUpdateTime(updateTime);
 
                         // 追加ボタンを有効にする。
-                        mAddButton.setEnabled(true);
+                        mAddPriceButton.setEnabled(true);
                     }
                 }
 
@@ -364,14 +365,124 @@ public class GoodsEditActivity extends AbstractBaseActivity {
                 mMemoValue.setText("");
                 break;
 
-            // 追加ボタンの場合
-            case R.id.addButton:
+            // カテゴリ名ボタンの場合
+            case R.id.categoryNameButton: {
+                Intent intent = new Intent(GoodsEditActivity.this, CategoryListActivity.class);
+                startActivityForResult(intent, RequestCode.CATEGORY_LIST);
+                break;
+            }
+
+            // 価格追加ボタンの場合
+            case R.id.addPriceButton: {
                 Intent intent = new Intent(GoodsEditActivity.this, PriceEditActivity.class);
+                PriceData priceData = new PriceData();
+                priceData.setCategoryId(mGoodsData.getCategoryId());
+                priceData.setCategoryName(mGoodsData.getCategoryName());
+                priceData.setGoodsId(mGoodsData.getId());
+                priceData.setGoodsName(mGoodsData.getName());
+                intent.putExtra(ExtraKey.PRICE_DATA, priceData);
                 startActivity(intent);
                 break;
+            }
 
             default:
                 break;
+            }
+        }
+    }
+
+    /**************************************************************************/
+    /**
+     * 価格リストアイテムクリックリスナークラス
+     *
+     */
+    private class PriceListOnItemClickListener implements OnItemClickListener {
+
+        /**
+         * リストアイテムがクリックされた時に呼び出される。
+         *
+         * @param parent 親のビュー
+         * @param view 対象のビュー
+         * @param position リストの位置
+         * @param id 対象のビューのID
+         */
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            // 価格編集画面に遷移する。
+            Intent intent = new Intent(GoodsEditActivity.this, PriceEditActivity.class);
+            intent.putExtra(ExtraKey.PRICE_DATA, mPriceDataList.get(position));
+            startActivity(intent);
+        }
+    }
+
+    /**************************************************************************/
+    /**
+     * 価格リストアイテムロングクリックリスナークラス
+     *
+     */
+    private class PriceListOnItemLongClickListener implements OnItemLongClickListener {
+
+        /** 価格アイテムの位置 */
+        private int mPosition;
+
+        /**
+         * リストアイテムがロングクリックされた時に呼び出される。
+         *
+         * @param parent 親のビュー
+         * @param view 対象のビュー
+         * @param position リストの位置
+         * @param id 対象のビューのID
+         * @return 処理結果
+         */
+        @Override
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            mPosition = position;
+
+            // 価格アイテム削除確認ダイアログを表示する。
+            AlertDialog.Builder builder = new AlertDialog.Builder(GoodsEditActivity.this);
+            builder.setTitle(R.string.delete_dialog_title);
+            builder.setMessage(R.string.delete_dialog_message);
+            builder.setIcon(android.R.drawable.ic_dialog_alert);
+            builder.setPositiveButton(R.string.delete_dialog_positive_button, new ButtonOnClickListener());
+            builder.setNegativeButton(R.string.delete_dialog_negative_button, null);
+            builder.setCancelable(true);
+            AlertDialog dialog = builder.create();
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+            return true;
+        }
+
+        /**
+         * ボタンクリックリスナークラス
+         */
+        private class ButtonOnClickListener implements DialogInterface.OnClickListener {
+
+            /**
+             * ボタンがクリックされた時に呼び出される。
+             *
+             * @param dialog ダイアログ
+             * @param which クリックされたボタン
+             */
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // 価格データを取得する。
+                PriceData priceData = mPriceDataList.get(mPosition);
+
+                String selection = PriceTable.ID + " = ?";
+                String[] selectionArgs = {String.valueOf(priceData.getId())};
+                int result = mResolver.delete(LowestProvider.PRICE_CONTENT_URI, selection, selectionArgs);
+
+                // 削除に失敗した場合
+                if (1 != result) {
+                    toast(R.string.pricedata_delete_error);
+
+                } else {
+                    // リストビューの内容を更新する。
+                    mPriceDataList.remove(mPosition);
+                    mPriceListAdapter.clear();
+                    mPriceListAdapter.addAll(mPriceDataList);
+                    mPriceListAdapter.notifyDataSetChanged();
+                }
             }
         }
     }
