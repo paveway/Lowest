@@ -16,46 +16,78 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal" >
 
-            <Button
-                android:id="@+id/addGoodsButton"
-                android:text="@string/add_goods_button"
-                style="?android:attr/buttonStyleSmall"
+            <TextView
+                android:id="@+id/goodsNameLabel"
+                android:text="@string/goods_name_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/goodsNameValue"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:padding="8dp"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/addPriceButton"
+                android:text="@string/add_price_button"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="horizontal" >
 
             <TextView
-                android:id="@+id/goodsNameLabel"
-                android:text="@string/goods_name_label"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:padding="8dp"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/shopNameLabel"
+                android:id="@+id/shopNameValue"
                 android:text="@string/shop_name_label"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
                 android:padding="8dp"
+                android:ellipsize="end"
+                android:lines="1"
                 android:textSize="16sp" />
 
             <TextView
-                android:id="@+id/unitPriceLabel"
+                android:id="@+id/quantityValue"
+                android:text="@string/quantity_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="8dp"
+                android:ellipsize="end"
+                android:lines="1"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/priceValue"
+                android:text="@string/price_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="8dp"
+                android:ellipsize="end"
+                android:lines="1"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/unitPriceValue"
                 android:text="@string/unit_price_label"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:padding="8dp"
+                android:ellipsize="end"
+                android:lines="1"
                 android:textSize="16sp" />
 
         </LinearLayout>
@@ -73,7 +105,7 @@
     </LinearLayout>
 
     <ListView
-        android:id="@+id/goodsListView"
+        android:id="@+id/priceListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_above="@id/footerLayout"
@@ -82,4 +114,3 @@
     </ListView>
 
 </RelativeLayout>
-

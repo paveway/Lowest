@@ -1,56 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">最低価格</string>
-    <string name="main_name">最低価格</string>
-    <string name="goods_list_name">商品リスト</string>
-    <string name="goods_edit_name">商品編集</string>
+    <!-- 画面タイトル -->
+    <string name="app_name">最低価格記録</string>
     <string name="category_list_name">カテゴリリスト</string>
-    <string name="price_edit_name">価格編集</string>
-    <string name="shop_list_name">店名リスト</string>
-    <string name="category_edit_name">カテゴリ編集</string>
-    <string name="shop_edit_name">店編集</string>
+    <string name="shop_list_name">店リスト</string>
+    <string name="price_list_name">価格リスト</string>
 
-    <string name="action_settings">設定</string>
+    <!-- メニュータイトル -->
+    <string name="menu_filter">フィルター</string>
+    <string name="menu_add_goods">商品追加</string>
 
-    <string name="add_category_button">カテゴリ追加</string>
+    <!-- ボタン名 -->
     <string name="add_goods_button">商品追加</string>
     <string name="add_price_button">価格追加</string>
     <string name="add_shop_button">店追加</string>
-    <string name="edit_button">編集</string>
-    <string name="delete_button">削除</string>
-    <string name="regist_button">登録</string>
-    <string name="clear_button">クリア</string>
-    <string name="unit_button">単位</string>
+
+    <string name="add_category_button">カテゴリ追加</string>
+
     <string name="category_name_button">カテゴリ名</string>
     <string name="shop_name_button">店名</string>
+    <string name="regist_button">登録</string>
+    <string name="update_button">更新</string>
+    <string name="delete_button">削除</string>
+    <string name="clear_button">クリア</string>
+    <string name="cancel_button">キャンセル</string>
 
-    <string name="category_name_label">カテゴリ名</string>
+    <!-- ラベル名 -->
     <string name="goods_name_label">商品名</string>
+    <string name="category_name_label">カテゴリ名</string>
+    <string name="shop_name_label">店名</string>
     <string name="quantity_label">数量</string>
     <string name="price_label">価格</string>
-    <string name="memo_label">メモ</string>
-    <string name="shop_name_label">店名</string>
     <string name="unit_price_label">単価</string>
+    <string name="memo_label">メモ</string>
 
-    <string name="no_delete_message">このデータは削除できません</string>
-
+    <!-- 削除ダイアログ -->
     <string name="delete_dialog_title">削除確認</string>
     <string name="delete_dialog_message">このデータを削除しますか</string>
     <string name="delete_dialog_positive_button">削除</string>
     <string name="delete_dialog_negative_button">キャンセル</string>
 
-    <string name="categoryname_dialog_title">カテゴリ名入力</string>
-    <string name="categoryname_dialog_positive_button">OK</string>
-    <string name="categoryname_dialog_netative_button">キャンセル</string>
-
-    <string name="categoryname_registed">登録済みです</string>
-    <string name="categoryname_regist_success">カテゴリ名を登録しました</string>
-    <string name="categoryname_regist_failure">カテゴリ名を登録できませんでした</string>
-    <string name="categoryname_no_input">カテゴリ名を入力してください</string>
-
-    <string name="pricedata_delete_error">価格データの削除に失敗しました</string>
+    <!-- 更新ダイアログ -->
+    <string name="update_dialog_title">更新確認</string>
+    <string name="update_dialog_message">このデータを更新しますか</string>
+    <string name="update_dialog_positive_button">更新</string>
+    <string name="update_dialog_negative_button">キャンセル</string>
 
     <string name="illeagal_transition">不正な画面遷移です</string>
+    <string name="pricedata_delete_error">価格データの削除に失敗しました</string>
+
+    <string name="default_value">未指定</string>
 
 </resources>

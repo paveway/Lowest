@@ -12,8 +12,8 @@
         android:orientation="horizontal" >
 
         <Button
-            android:id="@+id/addShopButton"
-            android:text="@string/add_shop_button"
+            android:id="@+id/addCategoryButton"
+            android:text="@string/unit_price_label"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
@@ -31,7 +31,7 @@
     </LinearLayout>
 
     <ListView
-        android:id="@+id/shopListView"
+        android:id="@+id/categoryListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_above="@id/footerLayout"

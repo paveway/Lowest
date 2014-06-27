@@ -16,7 +16,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="info.paveway.lowest.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,39 +25,24 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="info.paveway.lowest.GoodsListActivity"
-            android:label="@string/goods_list_name" >
-        </activity>
-        <activity
-            android:name="info.paveway.lowest.GoodsEditActivity"
-            android:label="@string/goods_edit_name" >
-        </activity>
-        <activity
-            android:name="info.paveway.lowest.CategoryListActivity"
-            android:label="@string/category_list_name" >
-        </activity>
-        <activity
-            android:name="info.paveway.lowest.PriceEditActivity"
-            android:label="@string/price_edit_name" >
-        </activity>
-        <activity
-            android:name="info.paveway.lowest.ShopListActivity"
+            android:name=".ShopListActivity"
             android:label="@string/shop_list_name" >
         </activity>
         <activity
-            android:name="info.paveway.lowest.CategoryEditActivity"
-            android:label="@string/category_edit_name" >
+            android:name=".CategoryListActivity"
+            android:label="@string/category_list_name" >
         </activity>
         <activity
-            android:name="info.paveway.lowest.ShopEditActivity"
-            android:label="@string/shop_edit_name" >
+            android:name=".PriceListActivity"
+            android:label="@string/price_list_name" >
         </activity>
+
         <activity
             android:name="com.google.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
 
         <provider
-            android:name="info.paveway.lowest.data.LowestProvider"
+            android:name=".data.LowestProvider"
             android:authorities="info.paveway.lowest.data.lowestprovider"
             android:exported="false" />
     </application>

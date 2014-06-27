@@ -3,19 +3,19 @@ package info.paveway.lowest;
 import info.paveway.log.Logger;
 import info.paveway.lowest.CommonConstants.ExtraKey;
 import info.paveway.lowest.data.LowestProvider;
-import info.paveway.lowest.data.LowestProvider.PriceTable;
 import info.paveway.lowest.data.LowestProvider.ShopTable;
 import info.paveway.lowest.data.ShopData;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import android.app.AlertDialog;
-import android.content.ContentProviderOperation;
-import android.content.DialogInterface;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -23,16 +23,22 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 /**
- * 最低価格
- * 店リスト画面
+ * 最低価格記録アプリ
+ * 店リスト画面クラス
  *
  * @version 1.0 新規作成
- *
  */
-public class ShopListActivity extends AbstractBaseActivity {
+public class ShopListActivity extends AbstractBaseActivity implements OnUpdateListener {
+
+    /** ロガー */
+    private Logger mLogger = new Logger(ShopListActivity.class);
+
+    /** 店名 */
+    private EditText mShopNameValue;
 
     /** 店データリスト */
     private List<ShopData> mShopDataList;
@@ -43,36 +49,42 @@ public class ShopListActivity extends AbstractBaseActivity {
     /**
      * 生成された時に呼び出される。
      *
-     * @param savedInstanceState 保存された時のインスタンスの状態
+     * @param savedInstanceState 保存した時のインスタンスの状態
      */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        // スーパークラスのメソッド
+    public void onCreate(Bundle savedInstanceState) {
+        mLogger.d("IN");
+
+        // スーパークラスのメソッドを呼び出す。
         super.onCreate(savedInstanceState);
 
         // レイアウトを設定する。
         setContentView(R.layout.activity_shop_list);
 
-        // コンテントリゾルバを取得する。
-        mResolver = getContentResolver();
+        // 店データリストを取得する。
+        getShopDataList();
 
-        ((Button)findViewById(R.id.addShopButton)).setOnClickListener(new ButtonOnClickListener());
-
-        // 店データリストを生成する。
-        mShopDataList = new ArrayList<ShopData>();
-        List<String> shopNameList = getShopNameList();
-
-        // 店リストアダプタを生成する。
-        mShopListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
-        for (String shopName : shopNameList) {
-            mShopListAdapter.add(shopName);
+        // 表示する店名のリストを生成する。
+        List<String> shopNameList = new ArrayList<String>();
+        for (ShopData shopData : mShopDataList) {
+            shopNameList.add(shopData.getName());
         }
 
-        // 店リストビューを生成する。
+        // 店リストビューを設定する。
+        mShopListAdapter =
+                new ArrayAdapter<String>(
+                        ShopListActivity.this, android.R.layout.simple_list_item_1, shopNameList);
         ListView shopListView = (ListView)findViewById(R.id.shopListView);
         shopListView.setAdapter(mShopListAdapter);
         shopListView.setOnItemClickListener(new ShopListOnItemClickListener());
         shopListView.setOnItemLongClickListener(new ShopListOnItemLongClickListener());
+
+        mShopNameValue = (EditText)findViewById(R.id.shopNameValue);
+
+        // リスナーを設定する。
+        ((Button)findViewById(R.id.addShopButton)).setOnClickListener(new ButtonOnClickListener());
+
+        mLogger.d("OUT(OK)");
     }
 
     /**
@@ -80,31 +92,50 @@ public class ShopListActivity extends AbstractBaseActivity {
      */
     @Override
     protected void onRestart() {
+        mLogger.d("IN");
+
         // スーパークラスのメソッドを呼び出す。
         super.onRestart();
+
+        // 店リストを更新する。
+        updateShopList();
+
+        mLogger.d("OUT(OK)");
+    }
+
+    /**
+     * 店リストを更新する。
+     */
+    private void updateShopList() {
+        mLogger.d("IN");
 
         // 店リストアダプタをクリアする。
         mShopListAdapter.clear();
 
-        // 店名リストを取得する。
-        List<String> shopNameList = getShopNameList();
+        // 店データリストを取得する。
+        getShopDataList();
 
         // 店リストアダプタに店名を再設定する。
-        for (String shopName : shopNameList) {
-            mShopListAdapter.add(shopName);
+        for (ShopData shopData : mShopDataList) {
+            mShopListAdapter.add(shopData.getName());
         }
 
         // 店リストアダプタを更新する。
         mShopListAdapter.notifyDataSetChanged();
+
+        mLogger.d("OUT(OK)");
     }
 
     /**
-     * 店名リストを取得する。
+     * 店データリストを取得する。
      *
-     * @return 店名リスト
      */
-    private List<String> getShopNameList() {
-        List<String> shopNameList = new ArrayList<String>();
+    private void getShopDataList() {
+        mLogger.d("IN");
+
+        // 店データリストを生成する。
+        mShopDataList = new ArrayList<ShopData>();
+
         // 店データのカーソルを取得する。
         Cursor c = mResolver.query(LowestProvider.SHOP_CONTENT_URI, null, null, null, null);
         try {
@@ -115,13 +146,12 @@ public class ShopListActivity extends AbstractBaseActivity {
                     do {
                         // 店データを生成し、店データリストに追加する。
                         ShopData shopData = new ShopData();
-                        shopData.setId(c.getInt(c.getColumnIndex(ShopTable.ID)));
-                        String shopName = c.getString(c.getColumnIndex(ShopTable.NAME));
-                        shopData.setName(shopName);
-                        mShopDataList.add(shopData);
+                        shopData.setId(        c.getInt(   c.getColumnIndex(ShopTable.ID)));
+                        shopData.setName(      c.getString(c.getColumnIndex(ShopTable.NAME)));
+                        shopData.setUpdateTime(c.getLong(  c.getColumnIndex(ShopTable.UPDATE_TIME)));
 
-                        // 店名データリストに設定する。
-                        shopNameList.add(shopName);
+                        // 店データリストに追加する。
+                        mShopDataList.add(shopData);
                     } while (c.moveToNext());
                 }
             }
@@ -130,7 +160,21 @@ public class ShopListActivity extends AbstractBaseActivity {
                 c.close();
             }
         }
-        return shopNameList;
+
+        mLogger.d("OUT(OK)");
+    }
+
+    /**
+     * 更新された時に呼び出される。
+     */
+    @Override
+    public void onUpdate() {
+        mLogger.d("IN");
+
+        // 店リストを更新する。
+        updateShopList();
+
+        mLogger.d("OUT(OK)");
     }
 
     /**************************************************************************/
@@ -140,6 +184,9 @@ public class ShopListActivity extends AbstractBaseActivity {
      */
     private class ButtonOnClickListener implements OnClickListener {
 
+        /** ロガー */
+        private Logger mLogger = new Logger(ButtonOnClickListener.class);
+
         /**
          * ボタンがクリックされた時に呼び出される。
          *
@@ -147,23 +194,65 @@ public class ShopListActivity extends AbstractBaseActivity {
          */
         @Override
         public void onClick(View v) {
-            // ボタンにより処理を判別する。
-            switch (v.getId()) {
-            // 店追加ボタンの場合
-            case R.id.addShopButton:
-                // 店編集画面を呼び出す。
-                Intent intent = new Intent(ShopListActivity.this, ShopEditActivity.class);
-                ShopData shopData = new ShopData();
-                shopData.setId(-1);
-                intent.putExtra(ExtraKey.SHOP_DATA, shopData);
-                startActivity(intent);
-                break;
+            mLogger.d("IN");
 
-            // 上記以外
-            default:
-                // 何もしない。
+            // クリックされたボタンにより処理を判別する。
+            switch (v.getId()) {
+            // 追加ボタンの場合
+            case R.id.addShopButton:
+                // 店名を取得する。
+                String shopName = mShopNameValue.getText().toString();
+
+                // 店名が未入力の場合
+                if (StringUtil.isNullOrEmpty(shopName)) {
+                    // 終了する。
+                    toast("店名が未入力です");
+                    return;
+                }
+
+                // 登録済みか確認する。
+                String selection = ShopTable.NAME + " = ?";
+                String[] selectionArgs = {shopName};
+                Cursor c = mResolver.query(LowestProvider.SHOP_CONTENT_URI, null, selection, selectionArgs, null);
+                boolean existFlg = false;
+                try {
+                    // カーソルがある場合
+                    if (null != c) {
+                        // データがある場合
+                        if (c.moveToFirst()) {
+                            // 登録済みとする。
+                            existFlg = true;
+                        }
+                    }
+                } finally {
+                    if (null != c) {
+                        c.close();
+                    }
+                }
+
+                // 登録済みの場合
+                if (existFlg) {
+                    // 終了する。
+                    toast("登録済みです");
+                    return;
+                }
+
+                long updateTime = new Date().getTime();
+                ContentValues values = new ContentValues();
+                values.put(ShopTable.NAME, shopName);
+                values.put(ShopTable.UPDATE_TIME, updateTime);
+                Uri result = mResolver.insert(LowestProvider.SHOP_CONTENT_URI, values);
+                if (null == result) {
+                    toast("登録に失敗しました");
+                    return;
+                }
+
+                // 店リストを更新する。
+                updateShopList();
                 break;
             }
+
+            mLogger.d("OUT(OK)");
         }
     }
 
@@ -173,6 +262,9 @@ public class ShopListActivity extends AbstractBaseActivity {
      *
      */
     private class ShopListOnItemClickListener implements OnItemClickListener {
+
+        /** ロガー */
+        private Logger mLogger = new Logger(ShopListOnItemClickListener.class);
 
         /**
          * リストアイテムがクリックされた時に呼び出される。
@@ -184,10 +276,15 @@ public class ShopListActivity extends AbstractBaseActivity {
          */
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            mLogger.d("IN");
+
+            // 呼び出し元画面に戻る。
             Intent intent = new Intent();
             intent.putExtra(ExtraKey.SHOP_DATA, mShopDataList.get(position));
             setResult(RESULT_OK, intent);
             finish();
+
+            mLogger.d("OUT(OK)");
         }
     }
 
@@ -201,9 +298,6 @@ public class ShopListActivity extends AbstractBaseActivity {
         /** ロガー */
         private Logger mLogger = new Logger(ShopListOnItemLongClickListener.class);
 
-        /** 店リスト位置 */
-        private int mPosition;
-
         /**
          * リストアイテムがロングクリックされた時に呼び出される。
          *
@@ -215,55 +309,14 @@ public class ShopListActivity extends AbstractBaseActivity {
          */
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            mPosition = position;
+            mLogger.d("IN");
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(ShopListActivity.this);
-            builder.setIcon(android.R.drawable.ic_dialog_alert);
-            builder.setTitle("店名削除確認");
-            builder.setMessage("店名を削除しますか");
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // 店データを削除する。
-                    deleteShopData();
-                }
-            });
-            builder.setNegativeButton("キャンセル", null);
-            AlertDialog dialog = builder.create();
-            dialog.show();
-            return false;
-        }
+            FragmentManager manager = getSupportFragmentManager();
+            ShopDetailDialog shopDetailDialog = ShopDetailDialog.newInstance(mShopDataList.get(position));
+            shopDetailDialog.show(manager, ShopDetailDialog.class.getSimpleName());
 
-        /**
-         * 店データを削除する。
-         */
-        private void deleteShopData() {
-            ArrayList<ContentProviderOperation> operationList =
-                    new ArrayList<ContentProviderOperation>();
-
-            ShopData shopData = mShopDataList.get(mPosition);
-            String shopId = String.valueOf(shopData.getId());
-
-            // 店テーブルのデータを削除する。
-            ContentProviderOperation.Builder builder =
-                       ContentProviderOperation.newDelete(LowestProvider.SHOP_CONTENT_URI);
-            String selection = ShopTable.ID + " = ?";
-            String[] selectionArgs = {shopId};
-            builder.withSelection(selection, selectionArgs);
-            operationList.add(builder.build());
-
-            // 価格テーブルのデータを削除する。
-            builder = ContentProviderOperation.newDelete(LowestProvider.PRICE_CONTENT_URI);
-            selection = PriceTable.SHOP_ID + " = ?";
-            builder.withSelection(selection, selectionArgs);
-            operationList.add(builder.build());
-
-            // バッチ処理を行う。
-            try {
-                mResolver.applyBatch(LowestProvider.AUTHORITY, operationList);
-            } catch (Exception e) {
-                mLogger.e(e);
-            }
+            mLogger.d("OUT(OK)");
+            return true;
         }
     }
 }

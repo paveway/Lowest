@@ -1,6 +1,7 @@
 package info.paveway.lowest.data;
 
 import info.paveway.log.Logger;
+import info.paveway.lowest.R;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,6 +17,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
 import android.content.UriMatcher;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -60,9 +62,6 @@ public class LowestProvider extends ContentProvider {
 
     /** コンテントアイテムタイプ */
     protected static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item" + AUTHORITY;
-
-    /** カテゴリ名デフォルト値 */
-    public static final String CATEGORY_NAME_DEFAULT_VALUE = "カテゴリ無";
 
     /** テーブル名 */
     private class TableName {
@@ -734,6 +733,8 @@ public class LowestProvider extends ContentProvider {
                     ShopTable.UPDATE_TIME +
                 ") VALUES (?, ?);";
 
+        private Resources mResources;
+
         /**
          * コンストラクタ
          * スーパークラスのコンストラクタを呼び出す。
@@ -742,6 +743,7 @@ public class LowestProvider extends ContentProvider {
             // スーパークラスのコンストラクタを呼び出す。
             super(context, null, null, DB_VERSION);
             mLogger.d("IN");
+            mResources = context.getResources();
             mLogger.d("OUT(OK)");
         }
 
@@ -769,48 +771,52 @@ public class LowestProvider extends ContentProvider {
                 db.execSQL(CREATE_SHOP_TABLE_SQL);
                 db.execSQL(CREATE_PRICE_TABLE_SQL);
 
+                // デフォルト値を取得する。
+                String defaultValue = mResources.getString(R.string.default_value);
+
                 SQLiteStatement stmt1 = db.compileStatement(INSERT_CATEGORY_TABLE_SQL);
                 long update = new Date().getTime();
-                insertCatetoryTable(stmt1, CATEGORY_NAME_DEFAULT_VALUE, update);
-                insertCatetoryTable(stmt1, "食品",                      update);
-                insertCatetoryTable(stmt1, "日用品",                    update);
-                insertCatetoryTable(stmt1, "電化製品",                  update);
-                insertCatetoryTable(stmt1, "家具",                      update);
+                insertCatetoryTable(stmt1, defaultValue,  update);
+                insertCatetoryTable(stmt1, "食品",        update);
+                insertCatetoryTable(stmt1, "日用品",      update);
+                insertCatetoryTable(stmt1, "電化製品",    update);
+                insertCatetoryTable(stmt1, "家具",        update);
 
                 SQLiteStatement stmt2 = db.compileStatement(INSERT_SHOP_TABLE_SQL);
-                insertShopTable(stmt2, "イトーヨーカ堂", update);
-                insertShopTable(stmt2, "ヨークマート", update);
-                insertShopTable(stmt2, "ヨークベニマル", update);
-                insertShopTable(stmt2, "西友", update);
-                insertShopTable(stmt2, "イオン", update);
-                insertShopTable(stmt2, "マックスバリュ", update);
-                insertShopTable(stmt2, "ダイエー", update);
-                insertShopTable(stmt2, "トポス", update);
-                insertShopTable(stmt2, "グルメシティ", update);
+                insertShopTable(stmt2, defaultValue,       update);
+                insertShopTable(stmt2, "イトーヨーカ堂",   update);
+                insertShopTable(stmt2, "ヨークマート",     update);
+                insertShopTable(stmt2, "ヨークベニマル",   update);
+                insertShopTable(stmt2, "西友",             update);
+                insertShopTable(stmt2, "イオン",           update);
+                insertShopTable(stmt2, "マックスバリュ",   update);
+                insertShopTable(stmt2, "ダイエー",         update);
+                insertShopTable(stmt2, "トポス",           update);
+                insertShopTable(stmt2, "グルメシティ",     update);
                 insertShopTable(stmt2, "スーパーアルプス", update);
-                insertShopTable(stmt2, "いなげや", update);
-                insertShopTable(stmt2, "エコス", update);
-                insertShopTable(stmt2, "オーケーストア", update);
-                insertShopTable(stmt2, "オザム", update);
-                insertShopTable(stmt2, "オリンピック", update);
-                insertShopTable(stmt2, "カスミ", update);
-                insertShopTable(stmt2, "紀ノ国屋", update);
+                insertShopTable(stmt2, "いなげや",         update);
+                insertShopTable(stmt2, "エコス",           update);
+                insertShopTable(stmt2, "オーケーストア",   update);
+                insertShopTable(stmt2, "オザム",           update);
+                insertShopTable(stmt2, "オリンピック",     update);
+                insertShopTable(stmt2, "カスミ",           update);
+                insertShopTable(stmt2, "紀ノ国屋",         update);
                 insertShopTable(stmt2, "クイーンズ伊勢丹", update);
-                insertShopTable(stmt2, "京王ストア", update);
-                insertShopTable(stmt2, "サミット", update);
-                insertShopTable(stmt2, "ジャパンミート", update);
-                insertShopTable(stmt2, "東武ストア", update);
-                insertShopTable(stmt2, "マイン", update);
-                insertShopTable(stmt2, "ベルク", update);
-                insertShopTable(stmt2, "マミーマート", update);
-                insertShopTable(stmt2, "ヤオコー", update);
+                insertShopTable(stmt2, "京王ストア",       update);
+                insertShopTable(stmt2, "サミット",         update);
+                insertShopTable(stmt2, "ジャパンミート",   update);
+                insertShopTable(stmt2, "東武ストア",       update);
+                insertShopTable(stmt2, "マイン",           update);
+                insertShopTable(stmt2, "ベルク",           update);
+                insertShopTable(stmt2, "マミーマート",     update);
+                insertShopTable(stmt2, "ヤオコー",         update);
                 insertShopTable(stmt2, "ピーコックストア", update);
-                insertShopTable(stmt2, "成城石井", update);
-                insertShopTable(stmt2, "明治屋", update);
-                insertShopTable(stmt2, "ユニー", update);
-                insertShopTable(stmt2, "長崎屋", update);
-                insertShopTable(stmt2, "ライフ", update);
-                insertShopTable(stmt2, "サエキ", update);
+                insertShopTable(stmt2, "成城石井",         update);
+                insertShopTable(stmt2, "明治屋",           update);
+                insertShopTable(stmt2, "ユニー",           update);
+                insertShopTable(stmt2, "長崎屋",           update);
+                insertShopTable(stmt2, "ライフ",           update);
+                insertShopTable(stmt2, "サエキ",           update);
 
                 // トランザクション成功とする。
                 db.setTransactionSuccessful();

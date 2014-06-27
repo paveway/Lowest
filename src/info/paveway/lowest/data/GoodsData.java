@@ -25,6 +25,9 @@ public class GoodsData extends AbstractBaseData {
     /** メモ */
     private String mMemo;
 
+    /** お気に入り */
+    private int mFavorite;
+
     /**
      * 価格データマップ
      * 最低価格順にソートするため内部で使用する。
@@ -95,6 +98,24 @@ public class GoodsData extends AbstractBaseData {
      */
     public String getMemo() {
         return mMemo;
+    }
+
+    /**
+     * お気に入りを設定する。
+     *
+     * @param favorite お気に入り
+     */
+    public void setFavorite(int favorite) {
+        mFavorite = favorite;
+    }
+
+    /**
+     * お気に入りを返却する。
+     *
+     * @return お気に入り
+     */
+    public int getFavorite() {
+        return mFavorite;
     }
 
     /**

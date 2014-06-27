@@ -1,18 +1,22 @@
 package info.paveway.lowest;
 
-import android.app.Activity;
+import info.paveway.log.Logger;
 import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
 
 /**
- * 最低価格
+ * 最低価格記録アプリ
  * 抽象ベース画面クラス
  *
  * @version 1.0 新規作成
  */
-public abstract class AbstractBaseActivity extends Activity {
+public abstract class AbstractBaseActivity extends FragmentActivity {
+
+    /** ロガー */
+    private Logger mLogger = new Logger(AbstractBaseActivity.class);
 
     /** コンテントリゾルバ */
     protected ContentResolver mResolver;
@@ -27,6 +31,8 @@ public abstract class AbstractBaseActivity extends Activity {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mLogger.d("IN");
+
         // スーパークラスのメソッドを呼び出す。
         super.onCreate(savedInstanceState);
 
@@ -35,12 +41,14 @@ public abstract class AbstractBaseActivity extends Activity {
 
         // リソースを取得する。
         mResources = getResources();
+
+        mLogger.d("OUT(OK)");
     }
 
     /**
      * トースト表示する。
      *
-     * @param id リソースID
+     * @param id 文字列リソースID
      */
     protected void toast(int id) {
         toast(getResources().getString(id));

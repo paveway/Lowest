@@ -1,35 +1,33 @@
 package info.paveway.lowest;
 
 /**
- * 最低価格
+ * 最低価格記録アプリ
  * 共通定数クラス
  *
  * @version 1.0 新規作成
+ *
  */
 public class CommonConstants {
 
     /** 要求コード */
     public class RequestCode {
-        /** 商品リスト画面 */
-        public static final int GOODS_LIST = 2;
+        /** メイン */
+        public static final int MAIN = 1;
 
-        /** 商品編集画面 */
-        public static final int GOODS_EDIT = 3;
+        /** 商品編集 */
+        public static final int GOODS_EDIT = 2;
 
-        /** カテゴリリスト画面 */
-        public static final int CATEGORY_LIST = 4;
+        /** カテゴリリスト */
+        public static final int CATEGORY_LIST = 3;
 
-        /** 価格編集画面 */
+        /** 店リスト */
+        public static final int SHOP_LIST = 4;
+
+        /** 価格編集 */
         public static final int PRICE_EDIT = 5;
 
-        /** 店リスト画面 */
-        public static final int SHOP_LIST = 6;
-
-        /** カテゴリ編集画面 */
-        public static final int CATEGORY_EDIT = 7;
-
-        /** 店編集画面 */
-        public static final int SHOP_EDIT = 8;
+        /** 価格リスト */
+        public static final int PRICE_LIST = 6;
     }
 
     /** Extraキー */
@@ -45,5 +43,11 @@ public class CommonConstants {
 
         /** 価格データ */
         public static final String PRICE_DATA = "priceData";
+    }
+
+    /** 設定ファイルキー */
+    public class PrefKey {
+        /** カテゴリID */
+        public static final String CATEGORY_ID = "categoryId";
     }
 }
