@@ -23,6 +23,7 @@
 
             <Button
                 android:id="@+id/registButton"
+                style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
@@ -30,6 +31,7 @@
 
             <Button
                 android:id="@+id/deleteButton"
+                style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -37,6 +39,7 @@
 
             <Button
                 android:id="@+id/clearButton"
+                style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
@@ -56,15 +59,22 @@
                     android:id="@+id/categoryNameLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical"
+                    android:padding="8dp"
+                    android:textSize="16sp"
                     android:text="@string/category_name_label" />
 
                 <EditText
                     android:id="@+id/categoryNameValue"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:ems="10" />
+                    android:ems="10"
+                    android:gravity="center_vertical"
+                    android:inputType="text"
+                    android:padding="8dp" />
 
             </TableRow>
 

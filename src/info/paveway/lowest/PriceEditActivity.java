@@ -144,13 +144,13 @@ public class PriceEditActivity extends AbstractBaseActivity {
             // 登録ボタンの場合
             case R.id.registButton:
                 // 入力値を取得する。
-                String shopName = mShopNameValue.getText().toString();
+                String shopName       = mShopNameValue.getText().toString();
                 String quantityString = mQuantityValue.getText().toString();
-                String priceString = mPriceValue.getText().toString();
-                String memo = mMemoValue.getText().toString();
+                String priceString    = mPriceValue.getText().toString();
+                String memo           = mMemoValue.getText().toString();
                 // 未入力の項目がある場合
-                if ((null == shopName      ) || "".equals(shopName      ) &&
-                    (null == quantityString) || "".equals(quantityString) &&
+                if ((null == shopName      ) || "".equals(shopName      ) ||
+                    (null == quantityString) || "".equals(quantityString) ||
                     (null == priceString   ) || "".equals(priceString   )) {
                     toast("全て入力して下さい");
 

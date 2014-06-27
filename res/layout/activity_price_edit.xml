@@ -18,6 +18,7 @@
 
         <Button
             android:id="@+id/registButton"
+            style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -25,6 +26,7 @@
 
         <Button
             android:id="@+id/clearButton"
+            style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
@@ -43,64 +45,79 @@
     </LinearLayout>
 
     <TableLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/footerLayout"
         android:layout_below="@id/buttonLayout" >
 
         <TableRow
             android:id="@+id/categoryNameRow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical" >
 
             <TextView
                 android:id="@+id/categroyNameLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:text="@string/category_name_label" />
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:text="@string/category_name_label"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/categoryNameValue"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingLeft="8dp"
-                android:textSize="20sp" />
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:textSize="16sp" />
 
         </TableRow>
 
         <TableRow
             android:id="@+id/goodsNameRow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical" >
 
             <TextView
                 android:id="@+id/goodsNameLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:text="@string/goods_name_label" />
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:text="@string/goods_name_label"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/goodsNameValue"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingLeft="8dp"
-                android:textSize="20sp" />
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:textSize="16sp" />
 
         </TableRow>
 
         <TableRow
             android:id="@+id/shopNameRow"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical" >
 
             <Button
                 android:id="@+id/shopNameButton"
+                style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:text="@string/shop_name_button" />
 
             <TextView
@@ -108,30 +125,43 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingLeft="8dp"
-                android:textSize="20sp" />
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:textSize="16sp" />
 
         </TableRow>
 
         <TableRow
             android:id="@+id/quantityRow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical" >
 
             <TextView
                 android:id="@+id/quantityLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:text="@string/quantity_label" />
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:text="@string/quantity_label"
+                android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/quantityValue"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
                 android:ems="10"
+                android:gravity="right"
+                android:imeOptions="actionDone"
                 android:inputType="number"
-                android:lines="1" >
+                android:lines="1"
+                android:maxLength="5"
+                android:padding="8dp"
+                android:textSize="16sp" >
 
                 <requestFocus />
             </EditText>
@@ -140,44 +170,64 @@
 
         <TableRow
             android:id="@+id/priceRow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical" >
 
             <TextView
                 android:id="@+id/priceLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:text="@string/price_label" />
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:text="@string/price_label"
+                android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/priceValue"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
                 android:ems="10"
+                android:gravity="center_vertical|right"
+                android:imeOptions="actionDone"
                 android:inputType="numberDecimal"
-                android:lines="1" />
+                android:lines="1"
+                android:maxLength="7"
+                android:padding="8dp"
+                android:textSize="16sp" />
 
         </TableRow>
 
         <TableRow
             android:id="@+id/memoRow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical" >
 
             <TextView
                 android:id="@+id/memoLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:text="@string/memo_label" />
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:text="@string/memo_label"
+                android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/memoValue"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:padding="8dp"
                 android:inputType="text"
-                android:lines="1" />
+                android:lines="1"
+                android:textSize="16sp" />
 
         </TableRow>
 

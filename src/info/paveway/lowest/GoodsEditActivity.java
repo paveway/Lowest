@@ -9,6 +9,7 @@ import info.paveway.lowest.data.LowestProvider.GoodsTable;
 import info.paveway.lowest.data.LowestProvider.PriceTable;
 import info.paveway.lowest.data.PriceData;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -111,7 +112,7 @@ public class GoodsEditActivity extends AbstractBaseActivity {
         mCategoryNameValue = (TextView)findViewById(R.id.categoryNameValue);
         mCategoryNameValue.setText(mGoodsData.getCategoryName());
 
-        mGoodsNameValue = (EditText)findViewById(R.id.cateogryNameValue);
+        mGoodsNameValue = (EditText)findViewById(R.id.goodsNameValue);
         mMemoValue      = (EditText)findViewById(R.id.memoValue);
 
         // 商品データ編集の場合
@@ -270,9 +271,9 @@ public class GoodsEditActivity extends AbstractBaseActivity {
             TextView unitPriceValue = (TextView)convertView.findViewById(R.id.unitPriceValue);
 
             shopNameValue.setText(                priceData.getShopName());
-            quantityValue.setText( String.valueOf(priceData.getQuantity()));
-            priceValue.setText(    String.valueOf(priceData.getPrice()));
-            unitPriceValue.setText(String.valueOf(priceData.getUnitPrice()));
+            quantityValue.setText( String.format("%.2f", priceData.getQuantity()));
+            priceValue.setText(    NumberFormat.getCurrencyInstance().format(priceData.getPrice()));
+            unitPriceValue.setText(String.format("@%.2f", priceData.getUnitPrice()));
 
             return convertView;
         }
@@ -443,7 +444,7 @@ public class GoodsEditActivity extends AbstractBaseActivity {
             builder.setTitle(R.string.delete_dialog_title);
             builder.setMessage(R.string.delete_dialog_message);
             builder.setIcon(android.R.drawable.ic_dialog_alert);
-            builder.setPositiveButton(R.string.delete_dialog_positive_button, new ButtonOnClickListener());
+            builder.setPositiveButton(R.string.delete_dialog_positive_button, new DialogButtonOnClickListener());
             builder.setNegativeButton(R.string.delete_dialog_negative_button, null);
             builder.setCancelable(true);
             AlertDialog dialog = builder.create();
@@ -453,9 +454,9 @@ public class GoodsEditActivity extends AbstractBaseActivity {
         }
 
         /**
-         * ボタンクリックリスナークラス
+         * ダイアログボタンクリックリスナークラス
          */
-        private class ButtonOnClickListener implements DialogInterface.OnClickListener {
+        private class DialogButtonOnClickListener implements DialogInterface.OnClickListener {
 
             /**
              * ボタンがクリックされた時に呼び出される。

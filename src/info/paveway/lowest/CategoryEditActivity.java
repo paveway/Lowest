@@ -191,7 +191,7 @@ public class CategoryEditActivity extends AbstractBaseActivity {
         }
 
         /**
-         * ボタンクリックリスナークラス
+         * ダイアログボタンクリックリスナークラス
          */
         private class DialogButtonOnClickListener implements DialogInterface.OnClickListener {
 
@@ -278,7 +278,7 @@ public class CategoryEditActivity extends AbstractBaseActivity {
 
                 // バッチ処理を行う。
                 try {
-                        mResolver.applyBatch(LowestProvider.AUTHORITY, operationList);
+                    mResolver.applyBatch(LowestProvider.AUTHORITY, operationList);
                 } catch (Exception e) {
                     toast("削除に失敗しました");
                 }

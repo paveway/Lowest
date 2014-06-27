@@ -82,7 +82,7 @@ public class GoodsListActivity extends AbstractBaseActivity {
             return;
         }
 
-        // 商品リストを取得する。
+        // 商品データリストを取得する。
         mGoodsDataList = getGoodsDataList();
 
         // 各ウィジットを設定する。
@@ -265,10 +265,14 @@ public class GoodsListActivity extends AbstractBaseActivity {
             TextView shopNameValue  = (TextView)convertView.findViewById(R.id.shopNameValue);
 
             goodsNameValue.setText(goodsData.getName());
+
+            // 価格データを取得する。
             PriceData priceData = goodsData.getLowestPriceData();
+
+            // 価格データが取得できた場合
             if (null != priceData) {
-                unitPriceValue.setText(String.valueOf(priceData.getUnitPrice()));
-                shopNameValue.setText(priceData.getName());
+                unitPriceValue.setText(String.format("@%.2f", priceData.getUnitPrice()));
+                shopNameValue.setText(priceData.getShopName());
             }
 
             return convertView;
@@ -363,7 +367,7 @@ public class GoodsListActivity extends AbstractBaseActivity {
             builder.setTitle(R.string.delete_dialog_title);
             builder.setMessage(R.string.delete_dialog_message);
             builder.setIcon(android.R.drawable.ic_dialog_alert);
-            builder.setPositiveButton(R.string.delete_dialog_positive_button, new ButtonOnClickListener());
+            builder.setPositiveButton(R.string.delete_dialog_positive_button, new DialogButtonOnClickListener());
             builder.setNegativeButton(R.string.delete_dialog_negative_button, null);
             builder.setCancelable(true);
             AlertDialog dialog = builder.create();
@@ -375,7 +379,7 @@ public class GoodsListActivity extends AbstractBaseActivity {
         /**
          * ボタンクリックリスナークラス
          */
-        private class ButtonOnClickListener implements DialogInterface.OnClickListener {
+        private class DialogButtonOnClickListener implements DialogInterface.OnClickListener {
 
             /**
              * ボタンがクリックされた時に呼び出される。
@@ -402,7 +406,7 @@ public class GoodsListActivity extends AbstractBaseActivity {
                     operationList.add(builder.build());
                 }
 
-                   // 商品データに関連する価格データを削除する。
+                // 商品データに関連する価格データを削除する。
                 {
                     String selection = PriceTable.ID + " = ?";
                     for (PriceData priceData : goodsData.getPriceDataList()) {

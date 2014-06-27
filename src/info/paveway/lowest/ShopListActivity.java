@@ -249,21 +249,21 @@ public class ShopListActivity extends AbstractBaseActivity {
                        ContentProviderOperation.newDelete(LowestProvider.SHOP_CONTENT_URI);
             String selection = ShopTable.ID + " = ?";
             String[] selectionArgs = {shopId};
-              builder.withSelection(selection, selectionArgs);
-               operationList.add(builder.build());
+            builder.withSelection(selection, selectionArgs);
+            operationList.add(builder.build());
 
-               // 価格テーブルのデータを削除する。
-               builder = ContentProviderOperation.newDelete(LowestProvider.PRICE_CONTENT_URI);
-               selection = PriceTable.SHOP_ID + " = ?";
-               builder.withSelection(selection, selectionArgs);
-               operationList.add(builder.build());
+            // 価格テーブルのデータを削除する。
+            builder = ContentProviderOperation.newDelete(LowestProvider.PRICE_CONTENT_URI);
+            selection = PriceTable.SHOP_ID + " = ?";
+            builder.withSelection(selection, selectionArgs);
+            operationList.add(builder.build());
 
-               // バッチ処理を行う。
-               try {
-                   mResolver.applyBatch(LowestProvider.AUTHORITY, operationList);
-               } catch (Exception e) {
-                   mLogger.e(e);
-               }
+            // バッチ処理を行う。
+            try {
+                mResolver.applyBatch(LowestProvider.AUTHORITY, operationList);
+            } catch (Exception e) {
+                mLogger.e(e);
+            }
         }
     }
 }

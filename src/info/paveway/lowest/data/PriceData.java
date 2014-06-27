@@ -184,7 +184,7 @@ public class PriceData extends AbstractBaseData {
      *
      * @return 価格
      */
-    public double getPrice() {
+    public long getPrice() {
         return mPrice;
     }
 

@@ -8,29 +8,41 @@
 
     <TextView
         android:id="@+id/shopNameValue"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="20sp" />
+        android:layout_weight="2"
+        android:layout_gravity="center_vertical"
+        android:padding="8dp"
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/quantityValue"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingLeft="8dp"
-        android:textSize="20sp" />
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:gravity="right"
+        android:padding="8dp"
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/priceValue"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingLeft="8dp"
-        android:textSize="20sp" />
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:gravity="right"
+        android:padding="8dp"
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/unitPriceValue"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingLeft="8dp"
-        android:textSize="20sp" />
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:gravity="right"
+        android:padding="8dp"
+        android:textSize="16sp" />
 
 </LinearLayout>
