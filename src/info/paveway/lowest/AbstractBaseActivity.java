@@ -4,7 +4,7 @@ import info.paveway.log.Logger;
 import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.widget.Toast;
 
 /**
@@ -13,7 +13,7 @@ import android.widget.Toast;
  *
  * @version 1.0 新規作成
  */
-public abstract class AbstractBaseActivity extends FragmentActivity {
+public abstract class AbstractBaseActivity extends ActionBarActivity {
 
     /** ロガー */
     private Logger mLogger = new Logger(AbstractBaseActivity.class);

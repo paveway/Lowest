@@ -1,29 +1,25 @@
-package info.paveway.lowest;
+package info.paveway.lowest.dialog;
 
 import info.paveway.log.Logger;
 import info.paveway.lowest.CommonConstants.ExtraKey;
+import info.paveway.lowest.OnUpdateListener;
+import info.paveway.lowest.R;
 import info.paveway.lowest.data.LowestProvider;
 import info.paveway.lowest.data.LowestProvider.PriceTable;
-import info.paveway.lowest.data.LowestProvider.ShopTable;
-import info.paveway.lowest.data.ShopData;
-
-import java.util.ArrayList;
-
+import info.paveway.lowest.data.PriceData;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
 /**
  * 最低価格記録アプリ
- * 店データ削除確認ダイアログクラス
+ * 価格データ削除確認ダイアログクラス
  *
  * @version 1.0 新規作成
  */
-public class ShopDeleteDialog extends AbstractBaseDialogFragment {
+public class PriceDeleteDialog extends AbstractBaseDialogFragment {
 
     /** ロガー */
     private Logger mLogger = new Logger(ShopDetailDialog.class);
@@ -31,18 +27,18 @@ public class ShopDeleteDialog extends AbstractBaseDialogFragment {
     /** 更新リスナー */
     private OnUpdateListener mOnUpdateListener;
 
-    /** 店データ */
-    private ShopData mShopData;
+    /** 価格データ */
+    private PriceData mPriceData;
 
     /**
      * インスタンスを生成する。
      *
      * @return インスタンス
      */
-    public static ShopDeleteDialog newInstance(ShopData shopData) {
-        ShopDeleteDialog instance = new ShopDeleteDialog();
+    public static PriceDeleteDialog newInstance(PriceData priceData) {
+        PriceDeleteDialog instance = new PriceDeleteDialog();
         Bundle args = new Bundle();
-        args.putSerializable(ExtraKey.SHOP_DATA, shopData);
+        args.putSerializable(ExtraKey.PRICE_DATA, priceData);
         instance.setArguments(args);
         return instance;
     }
@@ -81,13 +77,17 @@ public class ShopDeleteDialog extends AbstractBaseDialogFragment {
         mLogger.d("IN");
 
         // 引数を取得する。
-        mShopData = (ShopData)getArguments().getSerializable(ExtraKey.SHOP_DATA);
+        mPriceData = (PriceData)getArguments().getSerializable(ExtraKey.PRICE_DATA);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("削除確認");
-        builder.setMessage("「" + mShopData.getName() + "」を削除しますか");
-        builder.setPositiveButton("削除", new DialogButtonOnClickListener());
-        builder.setNegativeButton("キャンセル", new DialogButtonOnClickListener());
+        builder.setTitle(R.string.price_delete_dialog_title);
+        String message =
+                getResourceString(R.string.dialog_delete_message_prefix) +
+                mPriceData.getShopName() +
+                getResourceString(R.string.dialog_delete_message_suffix);
+        builder.setMessage(message);
+        builder.setPositiveButton(R.string.dialog_delete_button, new DialogButtonOnClickListener());
+        builder.setNegativeButton(R.string.dialog_cancel_button, new DialogButtonOnClickListener());
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
 
@@ -121,35 +121,11 @@ public class ShopDeleteDialog extends AbstractBaseDialogFragment {
             case Dialog.BUTTON_POSITIVE:
                 mLogger.d("BUTTON_POSITIVE");
 
-             // 操作リストを生成する。
-                ArrayList<ContentProviderOperation> operationList =
-                        new ArrayList<ContentProviderOperation>();
-
-                String shopId = String.valueOf(mShopData.getId());
-
-                String selection = ShopTable.ID + " = ?";
-                String[] selectionArgs = {shopId};
-
-                // 店テーブルのデータを削除する。
-                ContentProviderOperation.Builder builder =
-                           ContentProviderOperation.newDelete(LowestProvider.SHOP_CONTENT_URI);
-                builder.withSelection(selection, selectionArgs);
-                operationList.add(builder.build());
-
-                // 価格テーブルのデータを削除する。
-                builder = ContentProviderOperation.newDelete(LowestProvider.PRICE_CONTENT_URI);
-                selection = PriceTable.SHOP_ID + " = ?";
-                builder.withSelection(selection, selectionArgs);
-                operationList.add(builder.build());
-
-                ContentResolver resolver = getActivity().getContentResolver();
-
-                // バッチ処理を行う。
-                try {
-                    resolver.applyBatch(LowestProvider.AUTHORITY, operationList);
-                } catch (Exception e) {
-                    mLogger.e(e);
-                    toast("削除に失敗しました");
+                String selection = PriceTable.ID + " = ?";
+                String[] selectionArgs = {String.valueOf(mPriceData.getId())};
+                int result = getActivity().getContentResolver().delete(LowestProvider.PRICE_CONTENT_URI, selection, selectionArgs);
+                if (0 == result) {
+                    toast(R.string.error_delete);
                     mLogger.w("OUT(NG)");
                     return;
                 }
@@ -163,14 +139,16 @@ public class ShopDeleteDialog extends AbstractBaseDialogFragment {
 
             // キャンセルボタンの場合
             case Dialog.BUTTON_NEGATIVE:
-                toast("キャンセルします");
+                mLogger.d("BUTTON_NEGATIVE");
+
+                toast(R.string.error_cancel);
 
                 // 終了する。
                 dismiss();
                 break;
             }
 
-            mLogger.d("OUT(OK)");
+            mLogger.d("OUT(OUT)");
         }
     }
 }

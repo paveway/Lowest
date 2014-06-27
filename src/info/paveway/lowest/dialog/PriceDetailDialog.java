@@ -1,7 +1,8 @@
-package info.paveway.lowest;
+package info.paveway.lowest.dialog;
 
 import info.paveway.log.Logger;
 import info.paveway.lowest.CommonConstants.ExtraKey;
+import info.paveway.lowest.R;
 import info.paveway.lowest.data.PriceData;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -78,10 +79,10 @@ public class PriceDetailDialog extends AbstractBaseDialogFragment {
         mMemoValue.setText(mPriceData.getMemo());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("価格詳細");
-        builder.setPositiveButton("変更", new DialogButtonOnClickListener());
-        builder.setNeutralButton("削除", new DialogButtonOnClickListener());
-        builder.setNegativeButton("キャンセル", new DialogButtonOnClickListener());
+        builder.setTitle(R.string.price_detail_dialog_title);
+        builder.setPositiveButton(R.string.dialog_update_button, new DialogButtonOnClickListener());
+        builder.setNeutralButton( R.string.dialog_delete_button,  new DialogButtonOnClickListener());
+        builder.setNegativeButton(R.string.dialog_close_button,  new DialogButtonOnClickListener());
         builder.setView(rootView);
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
@@ -144,7 +145,7 @@ public class PriceDetailDialog extends AbstractBaseDialogFragment {
             case Dialog.BUTTON_NEGATIVE:
                 mLogger.d("BUTTON_NEGATIVE");
 
-                toast("キャンセルします");
+                toast(R.string.error_cancel);
 
                 // 終了する。
                 dismiss();

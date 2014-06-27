@@ -5,15 +5,14 @@ import info.paveway.lowest.CommonConstants.ExtraKey;
 import info.paveway.lowest.data.CategoryData;
 import info.paveway.lowest.data.LowestProvider;
 import info.paveway.lowest.data.LowestProvider.CategoryTable;
+import info.paveway.lowest.dialog.CategoryDetailDialog;
+import info.paveway.lowest.dialog.CategoryEditDialog;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
@@ -23,7 +22,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 
 /**
@@ -36,9 +34,6 @@ public class CategoryListActivity extends AbstractBaseActivity implements OnUpda
 
     /** ロガー */
     private Logger mLogger = new Logger(CategoryListActivity.class);
-
-    /** カテゴリ名入力 */
-    private EditText mCategoryNameValue;
 
     /** カテゴリデータリスト */
     private List<CategoryData> mCategoryDataList;
@@ -78,8 +73,6 @@ public class CategoryListActivity extends AbstractBaseActivity implements OnUpda
         categoryListView.setAdapter(mCategoryListAdapter);
         categoryListView.setOnItemClickListener(new CategoryListOnItemClickListener());
         categoryListView.setOnItemLongClickListener(new CategoryListOnItemLongClickListener());
-
-        mCategoryNameValue = (EditText)findViewById(R.id.categoryNameValue);
 
         // リスナーを設定する。
         ((Button)findViewById(R.id.addCategoryButton)).setOnClickListener(new ButtonOnClickListener());
@@ -122,7 +115,7 @@ public class CategoryListActivity extends AbstractBaseActivity implements OnUpda
 
         // カテゴリリストアダプタを更新する。
         mCategoryListAdapter.notifyDataSetChanged();
-        
+
         mLogger.d("OUT(OK)");
     }
 
@@ -201,55 +194,11 @@ public class CategoryListActivity extends AbstractBaseActivity implements OnUpda
             switch (v.getId()) {
             // 追加ボタンの場合
             case R.id.addCategoryButton:
-                // カテゴリ名を取得する。
-                String categoryName = mCategoryNameValue.getText().toString();
-
-                // カテゴリ名が未入力の場合
-                if (StringUtil.isNullOrEmpty(categoryName)) {
-                    // 終了する。
-                    toast("カテゴリ名が未入力です");
-                    return;
-                }
-
-                // 登録済みか確認する。
-                String selection = CategoryTable.NAME + " = ?";
-                String[] selectionArgs = {categoryName};
-                Cursor c = mResolver.query(LowestProvider.CATEGORY_CONTENT_URI, null, selection, selectionArgs, null);
-                boolean existFlg = false;
-                try {
-                    // カーソルがある場合
-                    if (null != c) {
-                        // データがある場合
-                        if (c.moveToFirst()) {
-                            // 登録済みとする。
-                            existFlg = true;
-                        }
-                    }
-                } finally {
-                    if (null != c) {
-                        c.close();
-                    }
-                }
-
-                // 登録済みの場合
-                if (existFlg) {
-                    // 終了する。
-                    toast("登録済みです");
-                    return;
-                }
-
-                long updateTime = new Date().getTime();
-                ContentValues values = new ContentValues();
-                values.put(CategoryTable.NAME, categoryName);
-                values.put(CategoryTable.UPDATE_TIME, updateTime);
-                Uri result = mResolver.insert(LowestProvider.CATEGORY_CONTENT_URI, values);
-                if (null == result) {
-                    toast("登録に失敗しました");
-                    return;
-                }
-
-                // カテゴリリストを更新する。
-                updateCategoryList();
+                // カテゴリ編集ダイアログを表示する。
+                CategoryData categoryData = new CategoryData();
+                FragmentManager manager = getSupportFragmentManager();
+                CategoryEditDialog categoryEditDialog = CategoryEditDialog.newInstance(categoryData);
+                categoryEditDialog.show(manager, CategoryEditDialog.class.getSimpleName());
                 break;
             }
 

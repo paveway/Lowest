@@ -1,10 +1,13 @@
-package info.paveway.lowest;
+package info.paveway.lowest.dialog;
 
 import info.paveway.log.Logger;
 import info.paveway.lowest.CommonConstants.ExtraKey;
+import info.paveway.lowest.OnUpdateListener;
+import info.paveway.lowest.R;
 import info.paveway.lowest.data.LowestProvider;
 import info.paveway.lowest.data.LowestProvider.ShopTable;
 import info.paveway.lowest.data.ShopData;
+import info.paveway.util.StringUtil;
 
 import java.util.Date;
 
@@ -97,9 +100,9 @@ public class ShopEditDialog extends AbstractBaseDialogFragment {
         mShopNameValue.setText(mShopData.getName());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("店編集");
-        builder.setPositiveButton("登録", new DialogButtonOnClickListener());
-        builder.setNegativeButton("キャンセル", new DialogButtonOnClickListener());
+        builder.setTitle(R.string.shop_edit_dialog_title);
+        builder.setPositiveButton(R.string.dialog_regist_button, new DialogButtonOnClickListener());
+        builder.setNegativeButton(R.string.dialog_cancel_button, new DialogButtonOnClickListener());
         builder.setView(rootView);
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
@@ -140,7 +143,7 @@ public class ShopEditDialog extends AbstractBaseDialogFragment {
                 // 店名が未入力の場合
                 if (StringUtil.isNullOrEmpty(shopName)) {
                     // 終了する。
-                    toast("店名が未入力です");
+                    toast(R.string.error_input_shop_name);
                     mLogger.w("OUT(NG)");
                     return;
                 }
@@ -151,7 +154,7 @@ public class ShopEditDialog extends AbstractBaseDialogFragment {
                     // 登録済みか確認する。
                     String selection = ShopTable.NAME + " = ?";
                     String[] selectionArgs = {shopName};
-                    Cursor c = resolver.query(LowestProvider.CATEGORY_CONTENT_URI, null, selection, selectionArgs, null);
+                    Cursor c = resolver.query(LowestProvider.SHOP_CONTENT_URI, null, selection, selectionArgs, null);
                     boolean existFlg = false;
                     try {
                         // カーソルがある場合
@@ -171,7 +174,7 @@ public class ShopEditDialog extends AbstractBaseDialogFragment {
                     // 登録済みの場合
                     if (existFlg) {
                         // 終了する。
-                        toast("登録済みです");
+                        toast(R.string.error_registed);
                         mLogger.w("OUT(NG)");
                         return;
                     }
@@ -188,7 +191,7 @@ public class ShopEditDialog extends AbstractBaseDialogFragment {
                     if (0 == shopId) {
                         Uri result = resolver.insert(LowestProvider.SHOP_CONTENT_URI, values);
                         if (null == result) {
-                            toast("登録に失敗しました");
+                            toast(R.string.error_regist);
                             mLogger.w("OUT(NG)");
                             return;
                         }
@@ -199,7 +202,7 @@ public class ShopEditDialog extends AbstractBaseDialogFragment {
                         String[] selectionArgs = {String.valueOf(shopId)};
                         int result = resolver.update(LowestProvider.SHOP_CONTENT_URI, values, selection, selectionArgs);
                         if (0 == result) {
-                            toast("更新に失敗しました");
+                            toast(R.string.error_update);
                             mLogger.w("OUT(NG)");
                             return;
                         }
@@ -217,7 +220,8 @@ public class ShopEditDialog extends AbstractBaseDialogFragment {
             // キャンセルボタンの場合
             case Dialog.BUTTON_NEGATIVE:
                 mLogger.d("BUTTON_NEGATIVE");
-                toast("キャンセルします");
+
+                toast(R.string.error_cancel);
 
                 // 終了する。
                 dismiss();

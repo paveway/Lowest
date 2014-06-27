@@ -1,8 +1,9 @@
-package info.paveway.lowest;
+package info.paveway.lowest.dialog;
 
 import info.paveway.log.Logger;
 import info.paveway.lowest.CommonConstants.ExtraKey;
-import info.paveway.lowest.data.GoodsData;
+import info.paveway.lowest.R;
+import info.paveway.lowest.data.ShopData;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -14,33 +15,30 @@ import android.widget.TextView;
 
 /**
  * 最低価格記録アプリ
- * 商品詳細ダイアログクラス
+ * 店詳細ダイアログクラス
  *
  * @version 1.0 新規作成
  */
-public class GoodsDetailDialog extends AbstractBaseDialogFragment {
+public class ShopDetailDialog extends AbstractBaseDialogFragment {
 
     /** ロガー */
-    private Logger mLogger = new Logger(GoodsDetailDialog.class);
+    private Logger mLogger = new Logger(ShopDetailDialog.class);
 
-    /** 商品データ */
-    private GoodsData mGoodsData;
+    /** 店データ */
+    private ShopData mShopData;
 
-    /** カテゴリ表示 */
-    private TextView mCategoryNameValue;
-
-    /** 商品名表示 */
-    private TextView mGoodsNameValue;
+    /** 店名表示 */
+    private TextView mShopNameValue;
 
     /**
      * インスタンスを生成する。
      *
      * @return インスタンス
      */
-    public static GoodsDetailDialog newInstance(GoodsData goodsData) {
-        GoodsDetailDialog instance = new GoodsDetailDialog();
+    public static ShopDetailDialog newInstance(ShopData shopData) {
+        ShopDetailDialog instance = new ShopDetailDialog();
         Bundle args = new Bundle();
-        args.putSerializable(ExtraKey.GOODS_DATA, goodsData);
+        args.putSerializable(ExtraKey.SHOP_DATA, shopData);
         instance.setArguments(args);
         return instance;
     }
@@ -56,22 +54,19 @@ public class GoodsDetailDialog extends AbstractBaseDialogFragment {
         mLogger.d("IN");
 
         // 引数を取得する。
-        mGoodsData = (GoodsData)getArguments().getSerializable(ExtraKey.GOODS_DATA);
+        mShopData = (ShopData)getArguments().getSerializable(ExtraKey.SHOP_DATA);
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View rootView = inflater.inflate(R.layout.dialog_goods_detail, null);
+        View rootView = inflater.inflate(R.layout.dialog_shop_detail, null);
 
-        mCategoryNameValue = (TextView)rootView.findViewById(R.id.categoryNameValue);
-        mGoodsNameValue    = (TextView)rootView.findViewById(R.id.goodsNameValue);
-
-        mCategoryNameValue.setText(mGoodsData.getCategoryName());
-        mGoodsNameValue.setText(mGoodsData.getName());
+        mShopNameValue = (TextView)rootView.findViewById(R.id.shopNameValue);
+        mShopNameValue.setText(mShopData.getName());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("商品詳細");
-        builder.setPositiveButton("変更", new DialogButtonOnClickListener());
-        builder.setNeutralButton("削除",  new DialogButtonOnClickListener());
-        builder.setNegativeButton("キャンセル", new DialogButtonOnClickListener());
+        builder.setTitle(R.string.shop_detail_dialog_title);
+        builder.setPositiveButton(R.string.dialog_update_button, new DialogButtonOnClickListener());
+        builder.setNeutralButton(R.string.dialog_delete_button, new DialogButtonOnClickListener());
+        builder.setNegativeButton(R.string.dialog_close_button, new DialogButtonOnClickListener());
         builder.setView(rootView);
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
@@ -106,10 +101,10 @@ public class GoodsDetailDialog extends AbstractBaseDialogFragment {
             case Dialog.BUTTON_POSITIVE: {
                 mLogger.d("BUTTON_POSITIVE");
 
-                // 商品編集ダイアログを表示する。
+                // 店データ編集ダイアログを表示する。
                 FragmentManager manager = getActivity().getSupportFragmentManager();
-                GoodsEditDialog goodsEditDialog = GoodsEditDialog.newInstance(mGoodsData);
-                goodsEditDialog.show(manager, GoodsEditDialog.class.getSimpleName());
+                ShopEditDialog shopEditDialog = ShopEditDialog.newInstance(mShopData);
+                shopEditDialog.show(manager, ShopEditDialog.class.getSimpleName());
 
                 // 終了する。
                 dismiss();
@@ -118,12 +113,10 @@ public class GoodsDetailDialog extends AbstractBaseDialogFragment {
 
             // 削除ボタンの場合
             case Dialog.BUTTON_NEUTRAL: {
-                mLogger.d("BUTTON_NEUTRAL");
-
-                // 商品データ削除確認ダイアログを表示する。
+                // 店データ削除確認ダイアログを表示する。
                 FragmentManager manager = getActivity().getSupportFragmentManager();
-                GoodsDeleteDialog goodsDeleteDialog = GoodsDeleteDialog.newInstance(mGoodsData);
-                goodsDeleteDialog.show(manager, GoodsDeleteDialog.class.getSimpleName());
+                ShopDeleteDialog shopDeleteDialog = ShopDeleteDialog.newInstance(mShopData);
+                shopDeleteDialog.show(manager, ShopDeleteDialog.class.getSimpleName());
 
                 // 終了する。
                 dismiss();
@@ -132,9 +125,8 @@ public class GoodsDetailDialog extends AbstractBaseDialogFragment {
 
             // キャンセルボタンの場合
             case Dialog.BUTTON_NEGATIVE:
-                mLogger.d("BUTTON_NEGATIVE");
 
-                toast("キャンセルします");
+                toast(R.string.error_cancel);
 
                 // 終了する。
                 dismiss();

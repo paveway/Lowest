@@ -1,14 +1,18 @@
-package info.paveway.lowest;
+package info.paveway.lowest.dialog;
 
 import info.paveway.log.Logger;
+import info.paveway.lowest.CategoryListActivity;
 import info.paveway.lowest.CommonConstants.ExtraKey;
 import info.paveway.lowest.CommonConstants.RequestCode;
+import info.paveway.lowest.OnUpdateListener;
+import info.paveway.lowest.R;
 import info.paveway.lowest.data.CategoryData;
 import info.paveway.lowest.data.GoodsData;
 import info.paveway.lowest.data.LowestProvider;
 import info.paveway.lowest.data.LowestProvider.GoodsTable;
 import info.paveway.lowest.data.LowestProvider.PriceTable;
 import info.paveway.lowest.data.PriceData;
+import info.paveway.util.StringUtil;
 
 import java.util.ArrayList;
 
@@ -119,9 +123,9 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("商品編集");
-        builder.setPositiveButton("登録", new DialogButtonOnClickListener());
-        builder.setNegativeButton("キャンセル", new DialogButtonOnClickListener());
+        builder.setTitle(R.string.goods_edit_dialog_title);
+        builder.setPositiveButton(R.string.dialog_regist_button, new DialogButtonOnClickListener());
+        builder.setNegativeButton(R.string.dialog_cancel_button, new DialogButtonOnClickListener());
         builder.setView(rootView);
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
@@ -229,7 +233,7 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
 
                 // 未入力の場合
                 if (StringUtil.isNullOrEmpty(goodsNameValue)) {
-                    toast("商品名が未入力です");
+                    toast(R.string.error_input_goods_name);
                     mLogger.w("OUT(NG)");
                     return;
                 }
@@ -248,7 +252,7 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
                             if (null != c) {
                                 // データがある場合
                                 if (c.moveToFirst()) {
-                                    toast("登録済みです");
+                                    toast(R.string.error_registed);
                                     mLogger.w("OUT(NG)");
                                     return;
                                 }
@@ -276,7 +280,7 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
 
                         // 登録に失敗した場合
                         if (null == result) {
-                            toast("登録に失敗しました");
+                            toast(R.string.error_regist);
                             mLogger.w("OUT(NG)");
                             return;
 
@@ -295,7 +299,7 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
 
                         // 更新に失敗した場合
                         if (1 != result) {
-                            toast("更新に失敗しました");
+                            toast(R.string.error_update);
                             mLogger.w("OUT(NG)");
                             return;
 
@@ -347,7 +351,7 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
                     getActivity().getContentResolver().applyBatch(LowestProvider.AUTHORITY, operationList);
                 } catch (Exception e) {
                     mLogger.e(e);
-                    toast("商品データの削除に失敗しました");
+                    toast(R.string.error_delete);
                     mLogger.w("OUT(NG)");
                     return;
                 }
@@ -364,7 +368,7 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
             case Dialog.BUTTON_NEGATIVE:
                 mLogger.d("BUTTON_NEGATIVE");
 
-                toast("キャンセルします");
+                toast(R.string.error_cancel);
 
                 // 終了する。
                 dismiss();

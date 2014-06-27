@@ -3,11 +3,16 @@ package info.paveway.lowest;
 import info.paveway.log.Logger;
 import info.paveway.lowest.CommonConstants.ExtraKey;
 import info.paveway.lowest.CommonConstants.RequestCode;
+import info.paveway.lowest.data.CategoryData;
 import info.paveway.lowest.data.GoodsData;
 import info.paveway.lowest.data.LowestProvider;
+import info.paveway.lowest.data.LowestProvider.CategoryTable;
 import info.paveway.lowest.data.LowestProvider.GoodsTable;
 import info.paveway.lowest.data.LowestProvider.PriceTable;
 import info.paveway.lowest.data.PriceData;
+import info.paveway.lowest.dialog.GoodsDetailDialog;
+import info.paveway.lowest.dialog.GoodsEditDialog;
+import info.paveway.lowest.dialog.InfoDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +22,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,6 +48,9 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
     /** ロガー */
     private Logger mLogger = new Logger(MainActivity.class);
 
+    /** カテゴリデータリスト */
+    private List<CategoryData> mCategoryDataList;
+
     /** 商品データリスト */
     private List<GoodsData> mGoodsDataList;
 
@@ -63,11 +72,24 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         // レイアウトを設定する。
         setContentView(R.layout.activity_main);
 
+        // カテゴリデータリストを取得する。
+        getCategoryDataList();
+
+        String[] categoryDatas = new String[mCategoryDataList.size()];
+        for (int i = 0; i < mCategoryDataList.size(); i++) {
+            categoryDatas[i] = mCategoryDataList.get(i).getName();
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, categoryDatas);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        actionBar.setListNavigationCallbacks(adapter, new CategoryFilterOnNavigationListener());
+
         // 商品追加ボタンにリスナーを設定する。
         ((Button)findViewById(R.id.addGoodsButton)).setOnClickListener(new ButtonOnClickListener());
 
         // 商品データリストを取得する。
-        mGoodsDataList = getGoodsDataList();
+        mGoodsDataList = getGoodsDataList(0);
 
         // 商品リストビューを設定する。
         mGoodsListAdapter = new GoodsListAdapter(this, 0, mGoodsDataList);
@@ -90,7 +112,7 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         super.onRestart();
 
         // 商品リストを更新する。
-        updateGoodsList();
+        updateGoodsList(0);
 
         mLogger.d("OUT(OK)");
     }
@@ -103,13 +125,26 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
+    /**
+     * メニューアイテムが選択された時に呼び出される。
+     *
+     * @param item メニューアイテム
+     * @return 処理結果
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // メニューにより処理を判別する。
         switch (item.getItemId()) {
+        // バージョン情報の場合
+        case R.id.menu_info:
+            FragmentManager manager = getSupportFragmentManager();
+            InfoDialog infoDialog = InfoDialog.newInstance();
+            infoDialog.show(manager, InfoDialog.class.getSimpleName());
+            break;
         }
         return false;
     }
@@ -118,17 +153,62 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
     /*** 内部メソッド                                                       ***/
     /**************************************************************************/
     /**
+     * カテゴリデータリストを取得する。
+     *
+     */
+    private void getCategoryDataList() {
+        mLogger.d("IN");
+
+        // カテゴリデータリストを生成する。
+        mCategoryDataList = new ArrayList<CategoryData>();
+
+        // カテゴリデータのカーソルを取得する。
+        Cursor c = mResolver.query(LowestProvider.CATEGORY_CONTENT_URI, null, null, null, null);
+        try {
+            // カーソルが取得できた場合
+            if (null != c) {
+                // データがある場合
+                if (c.moveToFirst()) {
+                    do {
+                        // カテゴリデータを生成し、データを設定する。
+                        CategoryData categoryData = new CategoryData();
+                        categoryData.setId(        c.getLong(  c.getColumnIndex(CategoryTable.ID)));
+                        categoryData.setName(      c.getString(c.getColumnIndex(CategoryTable.NAME)));
+                        categoryData.setUpdateTime(c.getLong(  c.getColumnIndex(CategoryTable.UPDATE_TIME)));
+
+                        // カテゴリデータリストに追加する。
+                        mCategoryDataList.add(categoryData);
+                    } while (c.moveToNext());
+                }
+            }
+        } finally {
+            if (null != c) {
+                c.close();
+            }
+        }
+
+        mLogger.d("OUT(OK)");
+    }
+
+    /**
      * 商品データリストを取得する。
      *
      * @return 商品データリスト
      */
-    private List<GoodsData> getGoodsDataList() {
+    private List<GoodsData> getGoodsDataList(long categoryId) {
         mLogger.d("IN");
 
         List<GoodsData> goodsDataList = new ArrayList<GoodsData>();
 
+        String selection = null;
+        String[] selectionArgs = null;
+        if (1 < categoryId) {
+            selection = GoodsTable.CATEGORY_ID + " = ?";
+            selectionArgs = new String[]{String.valueOf(categoryId)};
+        }
+
         // 商品データのカーソルを取得する。
-        Cursor c = mResolver.query(LowestProvider.GOODS_CONTENT_URI, null, null, null, null);
+        Cursor c = mResolver.query(LowestProvider.GOODS_CONTENT_URI, null, selection, selectionArgs, null);
         try {
             // カーソルが取得できた場合
             if (null != c) {
@@ -228,11 +308,11 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
     /**
      * 商品リストを更新する。
      */
-    private void updateGoodsList() {
+    private void updateGoodsList(long categoryId) {
         mLogger.d("IN");
 
         // 商品データリストを再取得する。
-        mGoodsDataList = getGoodsDataList();
+        mGoodsDataList = getGoodsDataList(categoryId);
 
         // 商品リストアダプタを再設定する。
         mGoodsListAdapter.clear();
@@ -250,9 +330,40 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         mLogger.d("IN");
 
         // 商品リストを更新する。
-        updateGoodsList();
+        updateGoodsList(0);
 
         mLogger.d("OUT(OK)");
+    }
+
+    /**************************************************************************/
+    /**
+     * カテゴリフィルターナビゲーションリスナークラス
+     *
+     */
+    public class CategoryFilterOnNavigationListener implements ActionBar.OnNavigationListener {
+
+        /** ロガー */
+        private Logger mLogger = new Logger(CategoryFilterOnNavigationListener.class);
+
+        /**
+         * ナビゲーションアイテムが選択された時に呼び出される。
+         *
+         * @param itemPosition 選択されたアイテムの位置
+         * @param itemId 選択されたアイテムのID
+         */
+        @Override
+        public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+            mLogger.d("IN");
+
+            // カテゴリリストを取得する。
+            getCategoryDataList();
+
+            // 商品データリストを更新する。
+            updateGoodsList(mCategoryDataList.get(itemPosition).getId());
+
+            mLogger.d("OUT(OK)");
+            return true;
+        }
     }
 
     /**************************************************************************/

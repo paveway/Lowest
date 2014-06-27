@@ -6,10 +6,14 @@ import info.paveway.lowest.data.GoodsData;
 import info.paveway.lowest.data.LowestProvider;
 import info.paveway.lowest.data.LowestProvider.PriceTable;
 import info.paveway.lowest.data.PriceData;
+import info.paveway.lowest.dialog.PriceDetailDialog;
+import info.paveway.lowest.dialog.PriceEditDialog;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeMap;
 
 import android.content.Context;
 import android.content.Intent;
@@ -53,7 +57,7 @@ public class PriceListActivity extends AbstractBaseActivity implements OnUpdateL
      * @param savedInstanceState 保存した時のインスタンスの状態
      */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         mLogger.d("IN");
 
         // スーパークラスのメソッドを呼び出す。
@@ -67,7 +71,7 @@ public class PriceListActivity extends AbstractBaseActivity implements OnUpdateL
         // インテントが取得できない場合
         if (null == intent) {
             // 終了する。
-            toast(R.string.illeagal_transition);
+            toast(R.string.error_illeagal_transition);
             finish();
             mLogger.w("OUT(NG)");
             return;
@@ -78,11 +82,14 @@ public class PriceListActivity extends AbstractBaseActivity implements OnUpdateL
         // 商品データが取得できない場合
         if (null == mGoodsData) {
             // 終了する。
-            toast(R.string.illeagal_transition);
+            toast(R.string.error_illeagal_transition);
             finish();
             mLogger.w("OUT(NG)");
             return;
         }
+
+        // カテゴリ名表示を設定する。
+        ((TextView)findViewById(R.id.categoryNameValue)).setText(mGoodsData.getCategoryName());
 
         // 商品名表示を設定する。
         ((TextView)findViewById(R.id.goodsNameValue)).setText(mGoodsData.getName());
@@ -101,6 +108,8 @@ public class PriceListActivity extends AbstractBaseActivity implements OnUpdateL
         // 価格リストを設定する。
         mPriceListAdapter =  new PriceListAdapter(PriceListActivity.this, 0, mPriceDataList);
         priceListView.setAdapter(mPriceListAdapter);
+
+        mLogger.d("OUT(OK)");
     }
 
     /**
@@ -111,11 +120,11 @@ public class PriceListActivity extends AbstractBaseActivity implements OnUpdateL
     private List<PriceData> getPriceDataList() {
         mLogger.d("IN");
 
-        List<PriceData> priceDataList = new ArrayList<PriceData>();
         long goodsId = mGoodsData.getId();
         String selection = PriceTable.GOODS_ID + " = ?";
         String[] selectionArgs = new String[]{String.valueOf(goodsId)};
         Cursor c = mResolver.query(LowestProvider.PRICE_CONTENT_URI, null, selection, selectionArgs, null);
+        TreeMap<Double, PriceData> sortMap = new TreeMap<Double, PriceData>();
         try {
             // カーソルが取得できた場合
             if (null != c) {
@@ -135,7 +144,8 @@ public class PriceListActivity extends AbstractBaseActivity implements OnUpdateL
                         priceData.setPrice(       c.getLong(  c.getColumnIndex(PriceTable.PRICE)));
                         priceData.setUpdateTime(  c.getLong(  c.getColumnIndex(PriceTable.UPDATE_TIME)));
 
-                        priceDataList.add(priceData);
+                        //priceDataList.add(priceData);
+                        sortMap.put(priceData.getUnitPrice(), priceData);
                     } while (c.moveToNext());
                 }
             }
@@ -143,6 +153,12 @@ public class PriceListActivity extends AbstractBaseActivity implements OnUpdateL
             if (null != c) {
                 c.close();
             }
+        }
+
+        List<PriceData> priceDataList = new ArrayList<PriceData>();
+        Iterator<PriceData> itr = sortMap.values().iterator();
+        while (itr.hasNext()) {
+            priceDataList.add(itr.next());
         }
 
         mLogger.d("OUT(OK)");

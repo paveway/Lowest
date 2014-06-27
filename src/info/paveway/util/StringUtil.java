@@ -1,4 +1,4 @@
-package info.paveway.lowest;
+package info.paveway.util;
 
 public class StringUtil {
 

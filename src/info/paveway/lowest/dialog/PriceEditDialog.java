@@ -1,12 +1,16 @@
-package info.paveway.lowest;
+package info.paveway.lowest.dialog;
 
 import info.paveway.log.Logger;
 import info.paveway.lowest.CommonConstants.ExtraKey;
 import info.paveway.lowest.CommonConstants.RequestCode;
+import info.paveway.lowest.OnUpdateListener;
+import info.paveway.lowest.R;
+import info.paveway.lowest.ShopListActivity;
 import info.paveway.lowest.data.LowestProvider;
 import info.paveway.lowest.data.LowestProvider.PriceTable;
 import info.paveway.lowest.data.PriceData;
 import info.paveway.lowest.data.ShopData;
+import info.paveway.util.StringUtil;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -123,9 +127,9 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("価格編集");
-        builder.setPositiveButton("登録", new DialogButtonOnClickListener());
-        builder.setNegativeButton("キャンセル", new DialogButtonOnClickListener());
+        builder.setTitle(R.string.price_edit_dialog_title);
+        builder.setPositiveButton(R.string.dialog_regist_button, new DialogButtonOnClickListener());
+        builder.setNegativeButton(R.string.dialog_cancel_button, new DialogButtonOnClickListener());
         builder.setView(rootView);
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
@@ -237,7 +241,7 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
                 if ((null == shopName      ) || "".equals(shopName      ) ||
                     (null == quantityString) || "".equals(quantityString) ||
                     (null == priceString   ) || "".equals(priceString   )) {
-                    toast("全て入力して下さい");
+                    toast(R.string.error_input_all);
                     mLogger.w("OUT(NG)");
                     return;
                 }
@@ -248,7 +252,7 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
                     quantity = Double.parseDouble(quantityString);
                 } catch (Exception e) {
                     mLogger.e(e);
-                    toast("数量が不正な値です");
+                    toast(R.string.error_illeagal_quantity);
                     mLogger.w("OUT(NG)");
                     return;
                 }
@@ -259,7 +263,7 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
                     price = Long.parseLong(priceString);
                 } catch (Exception e) {
                     mLogger.e(e);
-                    toast("価格が不正な値です");
+                    toast(R.string.error_illeagal_price);
                     mLogger.w("OUT(NG)");
                     return;
                 }
@@ -308,7 +312,7 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
 
                         // 登録に失敗した場合
                         if (null == result) {
-                            toast("登録に失敗しました");
+                            toast(R.string.error_regist);
                             mLogger.w("OUT(NG)");
                             return;
 
@@ -329,7 +333,7 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
 
                         // 更新に失敗した場合
                         if (1 != result) {
-                            toast("更新に失敗しました");
+                            toast(R.string.error_update);
                             mLogger.w("OUT(NG)");
                             return;
 
@@ -353,7 +357,7 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
             case Dialog.BUTTON_NEGATIVE:
                 mLogger.d("BUTTON_NEGATIVE");
 
-                toast("キャンセルします");
+                toast(R.string.error_cancel);
 
                 // 終了する。
                 dismiss();

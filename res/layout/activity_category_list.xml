@@ -13,7 +13,7 @@
 
         <Button
             android:id="@+id/addCategoryButton"
-            android:text="@string/unit_price_label"
+            android:text="@string/add_category_button"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

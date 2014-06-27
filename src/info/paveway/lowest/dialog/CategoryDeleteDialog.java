@@ -1,7 +1,9 @@
-package info.paveway.lowest;
+package info.paveway.lowest.dialog;
 
 import info.paveway.log.Logger;
 import info.paveway.lowest.CommonConstants.ExtraKey;
+import info.paveway.lowest.OnUpdateListener;
+import info.paveway.lowest.R;
 import info.paveway.lowest.data.CategoryData;
 import info.paveway.lowest.data.LowestProvider;
 import info.paveway.lowest.data.LowestProvider.CategoryTable;
@@ -87,10 +89,14 @@ public class CategoryDeleteDialog extends AbstractBaseDialogFragment {
         mCategoryData = (CategoryData)getArguments().getSerializable(ExtraKey.CATEGORY_DATA);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("削除確認");
-        builder.setMessage("「" + mCategoryData.getName() + "」を削除しますか");
-        builder.setPositiveButton("削除", new DialogButtonOnClickListener());
-        builder.setNegativeButton("キャンセル", new DialogButtonOnClickListener());
+        builder.setTitle(R.string.category_delete_dialog_title);
+        String message =
+                getResourceString(R.string.dialog_delete_message_prefix) +
+                mCategoryData.getName() +
+                getResourceString(R.string.dialog_delete_message_suffix);
+        builder.setMessage(message);
+        builder.setPositiveButton(R.string.dialog_delete_button, new DialogButtonOnClickListener());
+        builder.setNegativeButton(R.string.dialog_cancel_button, new DialogButtonOnClickListener());
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
 
@@ -205,7 +211,7 @@ public class CategoryDeleteDialog extends AbstractBaseDialogFragment {
                     resolver.applyBatch(LowestProvider.AUTHORITY, operationList);
                 } catch (Exception e) {
                     mLogger.e(e);
-                    toast("削除に失敗しました");
+                    toast(R.string.error_delete);
                     mLogger.w("OUT(NG)");
                     return;
                 }
@@ -219,7 +225,8 @@ public class CategoryDeleteDialog extends AbstractBaseDialogFragment {
 
             // キャンセルボタンの場合
             case Dialog.BUTTON_NEGATIVE:
-                toast("キャンセルします");
+
+                toast(R.string.error_cancel);
 
                 // 終了する。
                 dismiss();

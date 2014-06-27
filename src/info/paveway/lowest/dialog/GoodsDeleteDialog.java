@@ -1,42 +1,50 @@
-package info.paveway.lowest;
+package info.paveway.lowest.dialog;
 
 import info.paveway.log.Logger;
 import info.paveway.lowest.CommonConstants.ExtraKey;
+import info.paveway.lowest.OnUpdateListener;
+import info.paveway.lowest.R;
+import info.paveway.lowest.data.GoodsData;
 import info.paveway.lowest.data.LowestProvider;
+import info.paveway.lowest.data.LowestProvider.GoodsTable;
 import info.paveway.lowest.data.LowestProvider.PriceTable;
 import info.paveway.lowest.data.PriceData;
+
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ContentProviderOperation;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
 /**
  * 最低価格記録アプリ
- * 価格データ削除確認ダイアログクラス
+ * 商品データ削除確認ダイアログクラス
  *
  * @version 1.0 新規作成
  */
-public class PriceDeleteDialog extends AbstractBaseDialogFragment {
+public class GoodsDeleteDialog extends AbstractBaseDialogFragment {
 
     /** ロガー */
-    private Logger mLogger = new Logger(ShopDetailDialog.class);
+    private Logger mLogger = new Logger(GoodsDeleteDialog.class);
 
     /** 更新リスナー */
     private OnUpdateListener mOnUpdateListener;
 
-    /** 価格データ */
-    private PriceData mPriceData;
+    /** 商品データ */
+    private GoodsData mGoodsData;
 
     /**
      * インスタンスを生成する。
      *
      * @return インスタンス
      */
-    public static PriceDeleteDialog newInstance(PriceData priceData) {
-        PriceDeleteDialog instance = new PriceDeleteDialog();
+    public static GoodsDeleteDialog newInstance(GoodsData categoryData) {
+        GoodsDeleteDialog instance = new GoodsDeleteDialog();
         Bundle args = new Bundle();
-        args.putSerializable(ExtraKey.PRICE_DATA, priceData);
+        args.putSerializable(ExtraKey.GOODS_DATA, categoryData);
         instance.setArguments(args);
         return instance;
     }
@@ -75,13 +83,17 @@ public class PriceDeleteDialog extends AbstractBaseDialogFragment {
         mLogger.d("IN");
 
         // 引数を取得する。
-        mPriceData = (PriceData)getArguments().getSerializable(ExtraKey.PRICE_DATA);
+        mGoodsData = (GoodsData)getArguments().getSerializable(ExtraKey.GOODS_DATA);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("削除確認");
-        builder.setMessage("「" + mPriceData.getShopName() + "」を削除しますか");
-        builder.setPositiveButton("削除", new DialogButtonOnClickListener());
-        builder.setNegativeButton("キャンセル", new DialogButtonOnClickListener());
+        builder.setTitle(R.string.goods_delete_dialog_title);
+        String message =
+                getResourceString(R.string.dialog_delete_message_prefix) +
+                mGoodsData.getName() +
+                getResourceString(R.string.dialog_delete_message_suffix);
+        builder.setMessage(message);
+        builder.setPositiveButton(R.string.dialog_delete_button, new DialogButtonOnClickListener());
+        builder.setNegativeButton(R.string.dialog_cancel_button, new DialogButtonOnClickListener());
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
 
@@ -115,11 +127,38 @@ public class PriceDeleteDialog extends AbstractBaseDialogFragment {
             case Dialog.BUTTON_POSITIVE:
                 mLogger.d("BUTTON_POSITIVE");
 
-                String selection = PriceTable.ID + " = ?";
-                String[] selectionArgs = {String.valueOf(mPriceData.getId())};
-                int result = getActivity().getContentResolver().delete(LowestProvider.PRICE_CONTENT_URI, selection, selectionArgs);
-                if (0 == result) {
-                    toast("削除に失敗しました");
+                // 操作リストを生成する。
+                ArrayList<ContentProviderOperation> operationList =
+                        new ArrayList<ContentProviderOperation>();
+                ContentProviderOperation.Builder builder = null;
+
+                // 商品テーブルのデータを削除する。
+                {
+                    builder = ContentProviderOperation.newDelete(LowestProvider.GOODS_CONTENT_URI);
+                    String selection = GoodsTable.ID + " = ?";
+                    String[] selectionArgs = {String.valueOf(mGoodsData.getId())};
+                    builder.withSelection(selection, selectionArgs);
+                    operationList.add(builder.build());
+                }
+
+                // 商品データに関連する価格データを削除する。
+                {
+                    String selection = PriceTable.ID + " = ?";
+                    for (PriceData priceData : mGoodsData.getPriceDataList()) {
+                        // 価格テーブルのデータを削除する。
+                        builder = ContentProviderOperation.newDelete(LowestProvider.PRICE_CONTENT_URI);
+                        String[] selectionArgs = {String.valueOf(priceData.getId())};
+                        builder.withSelection(selection, selectionArgs);
+                        operationList.add(builder.build());
+                    }
+                }
+
+                // バッチ処理を行う。
+                try {
+                    getActivity().getContentResolver().applyBatch(LowestProvider.AUTHORITY, operationList);
+                } catch (Exception e) {
+                    mLogger.e(e);
+                    toast(R.string.error_delete);
                     mLogger.w("OUT(NG)");
                     return;
                 }
@@ -134,7 +173,8 @@ public class PriceDeleteDialog extends AbstractBaseDialogFragment {
             // キャンセルボタンの場合
             case Dialog.BUTTON_NEGATIVE:
                 mLogger.d("BUTTON_NEGATIVE");
-                toast("キャンセルします");
+
+                toast(R.string.error_cancel);
 
                 // 終了する。
                 dismiss();
