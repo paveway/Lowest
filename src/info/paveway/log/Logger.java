@@ -3,7 +3,9 @@ package info.paveway.log;
 import android.util.Log;
 
 /**
- * ログを出力します。
+ * ログ出力クラス
+ *
+ * @version 1.0 新規作成
  *
  */
 public class Logger {

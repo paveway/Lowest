@@ -8,7 +8,7 @@ import java.util.TreeMap;
 
 
 /**
- * 最低価格
+ * 最低価格記録アプリ
  * 商品データクラス
  *
  * @version 1.0 新規作成

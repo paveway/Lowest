@@ -10,20 +10,18 @@ import info.paveway.lowest.data.CategoryData;
 import info.paveway.lowest.data.GoodsData;
 import info.paveway.lowest.data.LowestProvider;
 import info.paveway.lowest.data.LowestProvider.GoodsTable;
-import info.paveway.lowest.data.LowestProvider.PriceTable;
-import info.paveway.lowest.data.PriceData;
 import info.paveway.util.StringUtil;
 
-import java.util.ArrayList;
+import java.util.Date;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -124,11 +122,30 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.goods_edit_dialog_title);
-        builder.setPositiveButton(R.string.dialog_regist_button, new DialogButtonOnClickListener());
-        builder.setNegativeButton(R.string.dialog_cancel_button, new DialogButtonOnClickListener());
+        builder.setPositiveButton(R.string.dialog_regist_button, null);
+        builder.setNegativeButton(R.string.dialog_cancel_button, null);
         builder.setView(rootView);
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
+        // ボタン押下でダイアログが閉じないようにリスナーを設定する。
+        dialog.setOnShowListener(new OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        resist();
+                    }
+                });
+
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_NEGATIVE).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        cancel();
+                    }
+                });
+            }
+        });
 
         mLogger.d("OUT(OUT)");
         return dialog;
@@ -202,180 +219,129 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
         }
     }
 
-    /**************************************************************************/
     /**
-     * ダイアログボタンクリックリスナークラス
-     *
+     * 登録する。
      */
-    private class DialogButtonOnClickListener implements DialogInterface.OnClickListener {
+    private void resist() {
+        mLogger.d("IN");
 
-        /** ロガー */
-        private Logger mLogger = new Logger(DialogButtonOnClickListener.class);
+        // 入力値を取得する。
+        String goodsNameValue = mGoodsNameValue.getText().toString();
 
-        /**
-         * ボタンがクリックされた時に呼び出される。
-         *
-         * @param dialog ダイアログ
-         * @param which クリックされたボタン
-         */
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            mLogger.d("IN");
-
-            // ボタンにより処理を判別する。
-            switch (which) {
-            // 登録ボタンの場合
-            case Dialog.BUTTON_POSITIVE: {
-                mLogger.d("BUTTON_POSITIVE");
-
-                // 入力値を取得する。
-                String goodsNameValue = mGoodsNameValue.getText().toString();
-
-                // 未入力の場合
-                if (StringUtil.isNullOrEmpty(goodsNameValue)) {
-                    toast(R.string.error_input_goods_name);
-                    mLogger.w("OUT(NG)");
-                    return;
-                }
-
-                ContentResolver resolver = getActivity().getContentResolver();
-
-                {
-                    // 新規登録の場合
-                    if (0 == mGoodsData.getId()) {
-                        // 登録済みか確認する。
-                        String selection = GoodsTable.NAME + " = ?";
-                        String[] selectionArgs = {goodsNameValue};
-                        Cursor c = resolver.query(LowestProvider.GOODS_CONTENT_URI, null, selection, selectionArgs, null);
-                        try {
-                            // カーソルがある場合
-                            if (null != c) {
-                                // データがある場合
-                                if (c.moveToFirst()) {
-                                    toast(R.string.error_registed);
-                                    mLogger.w("OUT(NG)");
-                                    return;
-                                }
-                            }
-                        } finally {
-                            if (null != c) {
-                                c.close();
-                            }
-                        }
-                    }
-                }
-
-                {
-                    ContentValues values = new ContentValues();
-                    values.put(GoodsTable.CATEGORY_ID,   mGoodsData.getCategoryId());
-                    values.put(GoodsTable.CATEGORY_NAME, mGoodsData.getCategoryName());
-                    values.put(GoodsTable.NAME,          goodsNameValue);
-
-                    // 商品データIDを取得する。
-                    long goodsId = mGoodsData.getId();
-
-                    // 未登録の場合
-                    if (0 == goodsId) {
-                        Uri result = resolver.insert(LowestProvider.GOODS_CONTENT_URI, values);
-
-                        // 登録に失敗した場合
-                        if (null == result) {
-                            toast(R.string.error_regist);
-                            mLogger.w("OUT(NG)");
-                            return;
-
-                        // 登録に成功した場合
-                        } else {
-                            mGoodsData.setId(ContentUris.parseId(result));
-                            mGoodsData.setName(goodsNameValue);
-                        }
-
-                    // 登録済みの場合
-                    } else {
-                        String selection = GoodsTable.ID + " = ?";
-                        String[] selectionArgs = {String.valueOf(goodsId)};
-                        int result =
-                                resolver.update(LowestProvider.GOODS_CONTENT_URI, values, selection, selectionArgs);
-
-                        // 更新に失敗した場合
-                        if (1 != result) {
-                            toast(R.string.error_update);
-                            mLogger.w("OUT(NG)");
-                            return;
-
-                        // 更新に成功した場合
-                        } else {
-                            mGoodsData.setName(goodsNameValue);
-                        }
-                    }
-                }
-
-                // 更新を通知する。
-                mOnUpdateListener.onUpdate();
-
-                // 終了する。
-                dismiss();
-                break;
-            }
-
-            // 削除ボタンの場合
-            case Dialog.BUTTON_NEUTRAL: {
-                // 操作リストを生成する。
-                ArrayList<ContentProviderOperation> operationList =
-                        new ArrayList<ContentProviderOperation>();
-                ContentProviderOperation.Builder builder = null;
-
-                // 商品テーブルのデータを削除する。
-                {
-                    builder = ContentProviderOperation.newDelete(LowestProvider.GOODS_CONTENT_URI);
-                    String selection = GoodsTable.ID + " = ?";
-                    String[] selectionArgs = {String.valueOf(mGoodsData.getId())};
-                    builder.withSelection(selection, selectionArgs);
-                    operationList.add(builder.build());
-                }
-
-                // 商品データに関連する価格データを削除する。
-                {
-                    String selection = PriceTable.ID + " = ?";
-                    for (PriceData priceData : mGoodsData.getPriceDataList()) {
-                        // 価格テーブルのデータを削除する。
-                        builder = ContentProviderOperation.newDelete(LowestProvider.PRICE_CONTENT_URI);
-                        String[] selectionArgs = {String.valueOf(priceData.getId())};
-                        builder.withSelection(selection, selectionArgs);
-                        operationList.add(builder.build());
-                    }
-                }
-
-                // バッチ処理を行う。
-                try {
-                    getActivity().getContentResolver().applyBatch(LowestProvider.AUTHORITY, operationList);
-                } catch (Exception e) {
-                    mLogger.e(e);
-                    toast(R.string.error_delete);
-                    mLogger.w("OUT(NG)");
-                    return;
-                }
-
-                // 更新を通知する。
-                mOnUpdateListener.onUpdate();
-
-                // 終了する。
-                dismiss();
-                break;
-            }
-
-            // キャンセルボタンの場合
-            case Dialog.BUTTON_NEGATIVE:
-                mLogger.d("BUTTON_NEGATIVE");
-
-                toast(R.string.error_cancel);
-
-                // 終了する。
-                dismiss();
-                break;
-            }
-
-            mLogger.d("OUT(OUT)");
+        // 未入力の場合
+        if (StringUtil.isNullOrEmpty(goodsNameValue)) {
+            toast(R.string.error_input_goods_name);
+            mLogger.w("OUT(NG)");
+            return;
         }
+
+        // カテゴリ名が選択されていない場合
+        if (0 == mGoodsData.getCategoryId()) {
+            toast(R.string.error_select_category);
+            mLogger.w("OUT(NG)");
+            return;
+        }
+
+        ContentResolver resolver = getActivity().getContentResolver();
+
+        {
+            // 新規登録の場合
+            if (0 == mGoodsData.getId()) {
+                // 登録済みか確認する。
+                String selection = GoodsTable.NAME + " = ?";
+                String[] selectionArgs = {goodsNameValue};
+                Cursor c = resolver.query(LowestProvider.GOODS_CONTENT_URI, null, selection, selectionArgs, null);
+                try {
+                    // カーソルがある場合
+                    if (null != c) {
+                        // データがある場合
+                        if (c.moveToFirst()) {
+                            toast(R.string.error_registed);
+                            mLogger.w("OUT(NG)");
+                            return;
+                        }
+                    }
+                } finally {
+                    if (null != c) {
+                        c.close();
+                    }
+                }
+            }
+        }
+
+        {
+            long updateTime = new Date().getTime();
+            ContentValues values = new ContentValues();
+            values.put(GoodsTable.CATEGORY_ID,   mGoodsData.getCategoryId());
+            values.put(GoodsTable.CATEGORY_NAME, mGoodsData.getCategoryName());
+            values.put(GoodsTable.NAME,          goodsNameValue);
+            values.put(GoodsTable.UPDATE_TIME,   updateTime);
+
+            // 商品データIDを取得する。
+            long goodsId = mGoodsData.getId();
+
+            // 未登録の場合
+            if (0 == goodsId) {
+                Uri result = resolver.insert(LowestProvider.GOODS_CONTENT_URI, values);
+
+                // 登録に失敗した場合
+                if (null == result) {
+                    toast(R.string.error_regist);
+                    mLogger.w("OUT(NG)");
+                    return;
+
+                // 登録に成功した場合
+                } else {
+                    toast(R.string.success_regist);
+
+                    mGoodsData.setId(ContentUris.parseId(result));
+                    mGoodsData.setName(goodsNameValue);
+                    mGoodsData.setUpdateTime(updateTime);
+                }
+
+            // 登録済みの場合
+            } else {
+                String selection = GoodsTable.ID + " = ?";
+                String[] selectionArgs = {String.valueOf(goodsId)};
+                int result =
+                        resolver.update(LowestProvider.GOODS_CONTENT_URI, values, selection, selectionArgs);
+
+                // 更新に失敗した場合
+                if (1 != result) {
+                    toast(R.string.error_update);
+                    mLogger.w("OUT(NG)");
+                    return;
+
+                // 更新に成功した場合
+                } else {
+                    toast(R.string.success_update);
+
+                    mGoodsData.setName(goodsNameValue);
+                    mGoodsData.setUpdateTime(updateTime);
+                }
+            }
+        }
+
+        // 更新を通知する。
+        mOnUpdateListener.onUpdate();
+
+        // 終了する。
+        dismiss();
+
+        mLogger.d("OUT(OK)");
+    }
+
+    /**
+     * キャンセルする。
+     */
+    private void cancel() {
+        mLogger.d("IN");
+
+        toast(R.string.error_cancel);
+
+        // 終了する。
+        dismiss();
+
+        mLogger.d("OUT(OK)");
     }
 }

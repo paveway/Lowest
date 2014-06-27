@@ -29,7 +29,7 @@ import android.provider.BaseColumns;
 import android.text.TextUtils;
 
 /**
- * 最低価格
+ * 最低価格記録アプリ
  * コンテントプロバイダークラス
  *
  * @version 1.0 新規作成

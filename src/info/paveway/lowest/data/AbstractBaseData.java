@@ -3,7 +3,7 @@ package info.paveway.lowest.data;
 import java.io.Serializable;
 
 /**
- * 最低価格
+ * 最低価格記録アプリ
  * データ抽象基底クラス
  *
  * @version 1.0 新規作成

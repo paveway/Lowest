@@ -11,6 +11,9 @@ import info.paveway.lowest.data.LowestProvider.PriceTable;
 import info.paveway.lowest.data.PriceData;
 import info.paveway.lowest.data.ShopData;
 import info.paveway.util.StringUtil;
+
+import java.util.Date;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -292,6 +295,7 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
                 }
 
                 {
+                    long updateTime = new Date().getTime();
                     ContentValues values = new ContentValues();
                     values.put(PriceTable.CATEGORY_ID,   mPriceData.getCagetoryId());
                     values.put(PriceTable.CATEGORY_NAME, mPriceData.getCategoryName());
@@ -302,6 +306,7 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
                     values.put(PriceTable.QUANTITY,      quantity);
                     values.put(PriceTable.PRICE,         price);
                     values.put(PriceTable.MEMO,          memo);
+                    values.put(PriceTable.UPDATE_TIME,   updateTime);
 
                     // 価格データIDを取得する。
                     long priceId = mPriceData.getId();
@@ -322,6 +327,7 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
                             mPriceData.setQuantity(quantity);
                             mPriceData.setPrice(price);
                             mPriceData.setMemo(memo);
+                            mPriceData.setUpdateTime(updateTime);
                         }
 
                     // 登録済みの場合
@@ -342,6 +348,7 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
                             mPriceData.setQuantity(quantity);
                             mPriceData.setPrice(price);
                             mPriceData.setMemo(memo);
+                            mPriceData.setUpdateTime(updateTime);
                         }
                     }
                 }

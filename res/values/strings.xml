@@ -57,6 +57,10 @@
     <string name="info_dialog_message_suffix">\nCopyright(C) paveway.info. All rights reserved.</string>
     <string name="info_dialog_positive_button">閉じる</string>
 
+    <string name="success_regist">登録しました</string>
+    <string name="success_update">更新しました</string>
+    <string name="success_delete">削除しました</string>
+
     <!-- エラーメッセージ -->
     <string name="error_illeagal_transition">不正な画面遷移です</string>
     <string name="error_cancel">キャンセルします</string>
@@ -69,6 +73,7 @@
     <string name="error_input_category_name">カテゴリ名が入力されていません</string>
     <string name="error_input_shop_name">店名が入力されていません</string>
     <string name="error_input_all">全て入力してください</string>
+    <string name="error_select_category">カテゴリ名が選択されていません</string>
     <string name="error_illeagal_quantity">数量が不正な値です</string>
     <string name="error_illeagal_price">価格が不正な値です</string>
 

@@ -57,6 +57,8 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
     /** 商品リストアダプタ */
     private GoodsListAdapter mGoodsListAdapter;
 
+    private int mCategoryFilterPostion;
+
     /**
      * 生成された時に呼び出される。
      *
@@ -89,7 +91,8 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         ((Button)findViewById(R.id.addGoodsButton)).setOnClickListener(new ButtonOnClickListener());
 
         // 商品データリストを取得する。
-        mGoodsDataList = getGoodsDataList(0);
+        mCategoryFilterPostion = 0;
+        mGoodsDataList = getGoodsDataList(mCategoryFilterPostion);
 
         // 商品リストビューを設定する。
         mGoodsListAdapter = new GoodsListAdapter(this, 0, mGoodsDataList);
@@ -112,7 +115,7 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         super.onRestart();
 
         // 商品リストを更新する。
-        updateGoodsList(0);
+        updateGoodsList(mCategoryFilterPostion);
 
         mLogger.d("OUT(OK)");
     }
@@ -141,6 +144,7 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         switch (item.getItemId()) {
         // バージョン情報の場合
         case R.id.menu_info:
+            // バージョン情報ダイアログを表示する。
             FragmentManager manager = getSupportFragmentManager();
             InfoDialog infoDialog = InfoDialog.newInstance();
             infoDialog.show(manager, InfoDialog.class.getSimpleName());
@@ -329,8 +333,19 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
     public void onUpdate() {
         mLogger.d("IN");
 
+        // カテゴリリストを取得する。
+        getCategoryDataList();
+
+        // カテゴリIDを取得する。
+        long categoryId = 0;
+        // カテゴリが削除された場合を考慮してチェックする。
+        if (mCategoryFilterPostion < mCategoryDataList.size()) {
+            // カテゴリIDを取得する(ただしカテゴリが削除された場合、前回選択したカテゴリとは限らない)
+            categoryId = mCategoryDataList.get(mCategoryFilterPostion).getId();
+        }
+
         // 商品リストを更新する。
-        updateGoodsList(0);
+        updateGoodsList(categoryId);
 
         mLogger.d("OUT(OK)");
     }
@@ -354,6 +369,9 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         @Override
         public boolean onNavigationItemSelected(int itemPosition, long itemId) {
             mLogger.d("IN");
+
+            // 選択位置を保存する。
+            mCategoryFilterPostion = itemPosition;
 
             // カテゴリリストを取得する。
             getCategoryDataList();
