@@ -17,11 +17,13 @@ import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnShowListener;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.EditText;
 
 /**
@@ -101,134 +103,131 @@ public class ShopEditDialog extends AbstractBaseDialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.shop_edit_dialog_title);
-        builder.setPositiveButton(R.string.dialog_regist_button, new DialogButtonOnClickListener());
-        builder.setNegativeButton(R.string.dialog_cancel_button, new DialogButtonOnClickListener());
+        builder.setPositiveButton(R.string.dialog_regist_button, null);
+        builder.setNegativeButton(R.string.dialog_cancel_button, null);
         builder.setView(rootView);
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
+        // ボタン押下でダイアログが閉じないようにリスナーを設定する。
+        dialog.setOnShowListener(new OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        doResist();
+                    }
+                });
+
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_NEGATIVE).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        doCancel();
+                    }
+                });
+            }
+        });
 
         mLogger.d("OUT(OUT)");
         return dialog;
     }
 
-    /**************************************************************************/
     /**
-     * ダイアログボタンクリックリスナークラス
-     *
+     * 登録する。
      */
-    private class DialogButtonOnClickListener implements DialogInterface.OnClickListener {
+    private void doResist() {
+        mLogger.d("IN");
 
-        /** ロガー */
-        private Logger mLogger = new Logger(DialogButtonOnClickListener.class);
+        // 店名を取得する。
+        String shopName = mShopNameValue.getText().toString();
 
-        /**
-         * ボタンがクリックされた時に呼び出される。
-         *
-         * @param dialog ダイアログ
-         * @param which クリックされたボタン
-         */
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            mLogger.d("IN");
+        // 店名が未入力の場合
+        if (StringUtil.isNullOrEmpty(shopName)) {
+            // 終了する。
+            toast(R.string.error_input_shop_name);
+            mLogger.w("OUT(NG)");
+            return;
+        }
 
-            // ボタンにより処理を判別する。
-            switch (which) {
-            // 変更ボタンの場合
-            case Dialog.BUTTON_POSITIVE: {
-                mLogger.d("BUTTON_POSITIVE");
+        ContentResolver resolver = getActivity().getContentResolver();
 
-                // 店名を取得する。
-                String shopName = mShopNameValue.getText().toString();
+        {
+            // 登録済みか確認する。
+            String selection = ShopTable.NAME + " = ?";
+            String[] selectionArgs = {shopName};
+            Cursor c = resolver.query(LowestProvider.SHOP_CONTENT_URI, null, selection, selectionArgs, null);
+            boolean existFlg = false;
+            try {
+                // カーソルがある場合
+                if (null != c) {
+                    // データがある場合
+                    if (c.moveToFirst()) {
+                        // 登録済みとする。
+                        existFlg = true;
+                    }
+                }
+            } finally {
+                if (null != c) {
+                    c.close();
+                }
+            }
 
-                // 店名が未入力の場合
-                if (StringUtil.isNullOrEmpty(shopName)) {
-                    // 終了する。
-                    toast(R.string.error_input_shop_name);
+            // 登録済みの場合
+            if (existFlg) {
+                // 終了する。
+                toast(R.string.error_registed);
+                mLogger.w("OUT(NG)");
+                return;
+            }
+        }
+
+        {
+            long shopId = mShopData.getId();
+            long updateTime = new Date().getTime();
+            ContentValues values = new ContentValues();
+            values.put(ShopTable.NAME, shopName);
+            values.put(ShopTable.UPDATE_TIME, updateTime);
+
+            // 新規登録の場合
+            if (0 == shopId) {
+                Uri result = resolver.insert(LowestProvider.SHOP_CONTENT_URI, values);
+                if (null == result) {
+                    toast(R.string.error_regist);
                     mLogger.w("OUT(NG)");
                     return;
                 }
 
-                ContentResolver resolver = getActivity().getContentResolver();
-
-                {
-                    // 登録済みか確認する。
-                    String selection = ShopTable.NAME + " = ?";
-                    String[] selectionArgs = {shopName};
-                    Cursor c = resolver.query(LowestProvider.SHOP_CONTENT_URI, null, selection, selectionArgs, null);
-                    boolean existFlg = false;
-                    try {
-                        // カーソルがある場合
-                        if (null != c) {
-                            // データがある場合
-                            if (c.moveToFirst()) {
-                                // 登録済みとする。
-                                existFlg = true;
-                            }
-                        }
-                    } finally {
-                        if (null != c) {
-                            c.close();
-                        }
-                    }
-
-                    // 登録済みの場合
-                    if (existFlg) {
-                        // 終了する。
-                        toast(R.string.error_registed);
-                        mLogger.w("OUT(NG)");
-                        return;
-                    }
+            // 更新の場合
+            } else {
+                String selection = ShopTable.ID + " = ?";
+                String[] selectionArgs = {String.valueOf(shopId)};
+                int result = resolver.update(LowestProvider.SHOP_CONTENT_URI, values, selection, selectionArgs);
+                if (0 == result) {
+                    toast(R.string.error_update);
+                    mLogger.w("OUT(NG)");
+                    return;
                 }
-
-                {
-                    long shopId = mShopData.getId();
-                    long updateTime = new Date().getTime();
-                    ContentValues values = new ContentValues();
-                    values.put(ShopTable.NAME, shopName);
-                    values.put(ShopTable.UPDATE_TIME, updateTime);
-
-                    // 新規登録の場合
-                    if (0 == shopId) {
-                        Uri result = resolver.insert(LowestProvider.SHOP_CONTENT_URI, values);
-                        if (null == result) {
-                            toast(R.string.error_regist);
-                            mLogger.w("OUT(NG)");
-                            return;
-                        }
-
-                    // 更新の場合
-                    } else {
-                        String selection = ShopTable.ID + " = ?";
-                        String[] selectionArgs = {String.valueOf(shopId)};
-                        int result = resolver.update(LowestProvider.SHOP_CONTENT_URI, values, selection, selectionArgs);
-                        if (0 == result) {
-                            toast(R.string.error_update);
-                            mLogger.w("OUT(NG)");
-                            return;
-                        }
-                    }
-                }
-
-                // 更新を通知する。
-                mOnUpdateListener.onUpdate();
-
-                // 終了する。
-                dismiss();
-                break;
             }
-
-            // キャンセルボタンの場合
-            case Dialog.BUTTON_NEGATIVE:
-                mLogger.d("BUTTON_NEGATIVE");
-
-                toast(R.string.error_cancel);
-
-                // 終了する。
-                dismiss();
-                break;
-            }
-
-            mLogger.d("OUT(OUT)");
         }
+
+        // 更新を通知する。
+        mOnUpdateListener.onUpdate();
+
+        // 終了する。
+        dismiss();
+        mLogger.d("OUT(OK)");
+    }
+
+    /**
+     * キャンセルする。
+     */
+    private void doCancel() {
+        mLogger.d("IN");
+
+        toast(R.string.error_cancel);
+
+        // 終了する。
+        dismiss();
+        mLogger.d("OUT(OK)");
     }
 }

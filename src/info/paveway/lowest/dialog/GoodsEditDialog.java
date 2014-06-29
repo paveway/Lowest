@@ -109,7 +109,12 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
         View rootView = inflater.inflate(R.layout.dialog_goods_edit, null);
 
         // カテゴリ名ボタンにリスナーを設定する。
-        ((Button)rootView.findViewById(R.id.categoryNameButton)).setOnClickListener(new ButtonOnClickListener());
+        ((Button)rootView.findViewById(R.id.categoryNameButton)).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                doCategoryName();
+            }
+        });
 
         mCategoryNameValue = (TextView)rootView.findViewById(R.id.categoryNameValue);
         mGoodsNameValue = (EditText)rootView.findViewById(R.id.goodsNameValue);
@@ -134,14 +139,14 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
                 ((AlertDialog)dialog).getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        resist();
+                        doResist();
                     }
                 });
 
                 ((AlertDialog)dialog).getButton(Dialog.BUTTON_NEGATIVE).setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        cancel();
+                        doCancel();
                     }
                 });
             }
@@ -184,45 +189,23 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
         mLogger.d("OUT(OUT)");
     }
 
-    /**************************************************************************/
     /**
-     * ダイアログボタンクリックリスナークラス
-     *
+     * カテゴリ名ボタンをクリックした時の処理を行う。
      */
-    private class ButtonOnClickListener implements OnClickListener {
-
-        /** ロガー */
-        private Logger mLogger = new Logger(ButtonOnClickListener.class);
-
-        /**
-         * ボタンがクリックされた時に呼び出される。
-         *
-         * @param v クリックされたボタン
-         */
-        @Override
-        public void onClick(View v) {
-            mLogger.d("IN");
-
-            // ボタンにより処理を判別する。
-            switch (v.getId()) {
-            // カテゴリ名ボタンの場合
-            case R.id.categoryNameButton:
-                mLogger.d("categoryNameButton");
-
-                // カテゴリリスト画面を表示する。
-                Intent intent = new Intent(getActivity(), CategoryListActivity.class);
-                startActivityForResult(intent, RequestCode.CATEGORY_LIST);
-                break;
-            }
-
-            mLogger.d("OUT(OUT)");
-        }
+    public void doCategoryName() {
+        mLogger.d("IN");
+        
+        // カテゴリリスト画面を表示する。
+        Intent intent = new Intent(getActivity(), CategoryListActivity.class);
+        startActivityForResult(intent, RequestCode.CATEGORY_LIST);
+        
+        mLogger.d("OUT(OK)");
     }
 
     /**
      * 登録する。
      */
-    private void resist() {
+    private void doResist() {
         mLogger.d("IN");
 
         // 入力値を取得する。
@@ -327,21 +310,19 @@ public class GoodsEditDialog extends AbstractBaseDialogFragment {
 
         // 終了する。
         dismiss();
-
         mLogger.d("OUT(OK)");
     }
 
     /**
      * キャンセルする。
      */
-    private void cancel() {
+    private void doCancel() {
         mLogger.d("IN");
 
         toast(R.string.error_cancel);
 
         // 終了する。
         dismiss();
-
         mLogger.d("OUT(OK)");
     }
 }

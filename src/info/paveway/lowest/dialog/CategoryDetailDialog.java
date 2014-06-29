@@ -7,10 +7,12 @@ import info.paveway.lowest.data.CategoryData;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnShowListener;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 /**
@@ -64,75 +66,85 @@ public class CategoryDetailDialog extends AbstractBaseDialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.category_detail_dialog_title);
-        builder.setPositiveButton(R.string.dialog_update_button, new DialogButtonOnClickListener());
-        builder.setNeutralButton(R.string.dialog_delete_button,   new DialogButtonOnClickListener());
-        builder.setNegativeButton(R.string.dialog_close_button,  new DialogButtonOnClickListener());
+        builder.setPositiveButton(R.string.dialog_update_button, null);
+        builder.setNeutralButton( R.string.dialog_delete_button, null);
+        builder.setNegativeButton(R.string.dialog_close_button,  null);
         builder.setView(rootView);
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
+        // ボタン押下でダイアログが閉じないようにリスナーを設定する。
+        dialog.setOnShowListener(new OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        doUpdate();
+                    }
+                });
+
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_NEUTRAL).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        doDelete();
+                    }
+                });
+
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_NEGATIVE).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        doCancel();
+                    }
+                });
+            }
+        });
 
         mLogger.d("OUT(OUT)");
         return dialog;
     }
 
-    /**************************************************************************/
     /**
-     * ダイアログボタンクリックリスナークラス
-     *
+     * 変更する。
      */
-    private class DialogButtonOnClickListener implements DialogInterface.OnClickListener {
+    private void doUpdate() {
+        mLogger.d("IN");
 
-        /** ロガー */
-        private Logger mLogger = new Logger(DialogButtonOnClickListener.class);
+        // カテゴリ編集ダイアログを表示する。
+        FragmentManager manager = getActivity().getSupportFragmentManager();
+        CategoryEditDialog categoryEditDialog = CategoryEditDialog.newInstance(mCategoryData);
+        categoryEditDialog.show(manager, CategoryEditDialog.class.getSimpleName());
 
-        /**
-         * ボタンがクリックされた時に呼び出される。
-         *
-         * @param dialog ダイアログ
-         * @param which クリックされたボタン
-         */
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            mLogger.d("IN");
+        // 終了する。
+        dismiss();
+        mLogger.d("OUT(OK)");
+    }
 
-            // ボタンにより処理を判別する。
-            switch (which) {
-            // 変更ボタンの場合
-            case Dialog.BUTTON_POSITIVE: {
-                mLogger.d("BUTTON_POSITIVE");
+    /**
+     * 削除する。
+     */
+    private void doDelete() {
+        mLogger.d("IN");
 
-                // カテゴリ編集ダイアログを表示する。
-                FragmentManager manager = getActivity().getSupportFragmentManager();
-                CategoryEditDialog categoryEditDialog = CategoryEditDialog.newInstance(mCategoryData);
-                categoryEditDialog.show(manager, CategoryEditDialog.class.getSimpleName());
+        // カテゴリデータ削除確認ダイアログを表示する。
+        FragmentManager manager = getActivity().getSupportFragmentManager();
+        CategoryDeleteDialog categoryDeleteDialog = CategoryDeleteDialog.newInstance(mCategoryData);
+        categoryDeleteDialog.show(manager, CategoryDeleteDialog.class.getSimpleName());
 
-                // 終了する。
-                dismiss();
-                break;
-            }
+        // 終了する。
+        dismiss();
+        mLogger.d("OUT(OK)");
+    }
 
-            // 削除ボタンの場合
-            case Dialog.BUTTON_NEUTRAL: {
-                // カテゴリデータ削除確認ダイアログを表示する。
-                FragmentManager manager = getActivity().getSupportFragmentManager();
-                CategoryDeleteDialog categoryDeleteDialog = CategoryDeleteDialog.newInstance(mCategoryData);
-                categoryDeleteDialog.show(manager, CategoryDeleteDialog.class.getSimpleName());
+    /**
+     * キャンセルする。
+     */
+    private void doCancel() {
+        mLogger.d("IN");
 
-                // 終了する。
-                dismiss();
-                break;
-            }
+        toast(R.string.error_cancel);
 
-            // 閉じるボタンの場合
-            case Dialog.BUTTON_NEGATIVE:
-                toast(R.string.error_cancel);
-
-                // 終了する。
-                dismiss();
-                break;
-            }
-
-            mLogger.d("OUT(OUT)");
-        }
+        // 終了する。
+        dismiss();
+        mLogger.d("OUT(OK)");
     }
 }

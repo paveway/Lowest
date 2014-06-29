@@ -660,7 +660,7 @@ public class LowestProvider extends ContentProvider {
         private Logger mLogger = new Logger(DataHelper.class);
 
         /** データベースバージョン */
-        private static final int DB_VERSION = 1;
+        private static final int DB_VERSION = 2;
 
         /** カテゴリテーブル削除SQL */
         private static final String DROP_CATEGORY_TABLE_SQL = "DROP TABLE IF EXISTS " + TableName.CATEGORY;
@@ -764,7 +764,7 @@ public class LowestProvider extends ContentProvider {
 //                db.execSQL(DROP_GOODS_TABLE_SQL);
 //                db.execSQL(DROP_SHOP_TABLE_SQL);
 //                db.execSQL(DROP_PRICE_TABLE_SQL);
-
+                
                 // 新規にテーブルを生成する。
                 db.execSQL(CREATE_CATEGORY_TABLE_SQL);
                 db.execSQL(CREATE_GOODS_TABLE_SQL);

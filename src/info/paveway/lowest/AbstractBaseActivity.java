@@ -46,20 +46,21 @@ public abstract class AbstractBaseActivity extends ActionBarActivity {
     }
 
     /**
+     * リソース文字列を返却する。
+     *
+     * @param id 文字列のリソースID
+     * @return リソース文字列
+     */
+    protected String getResourceString(int id) {
+        return mResources.getString(id);
+    }
+    
+    /**
      * トースト表示する。
      *
      * @param id 文字列リソースID
      */
     protected void toast(int id) {
-        toast(getResources().getString(id));
-    }
-
-    /**
-     * トースト表示する。
-     *
-     * @param message メッセージ
-     */
-    protected void toast(String message) {
-        Toast.makeText(AbstractBaseActivity.this, message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(AbstractBaseActivity.this, getResources().getString(id), Toast.LENGTH_SHORT).show();
     }
 }

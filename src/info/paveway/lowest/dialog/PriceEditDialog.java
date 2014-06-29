@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -114,7 +115,13 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
         View rootView = inflater.inflate(R.layout.dialog_price_edit, null);
 
         // 店名ボタンにリスナーを設定する。
-        ((Button)rootView.findViewById(R.id.shopNameButton)).setOnClickListener(new ButtonOnClickListener());
+        ((Button)rootView.findViewById(R.id.shopNameButton)).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 店名ボタンの処理を行う。
+                doShopNameButton();
+            }
+        });
 
         mShopNameValue = (TextView)rootView.findViewById(R.id.shopNameValue);
         mQuantityValue = (EditText)rootView.findViewById(R.id.quantityValue);
@@ -131,11 +138,39 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.price_edit_dialog_title);
-        builder.setPositiveButton(R.string.dialog_regist_button, new DialogButtonOnClickListener());
-        builder.setNegativeButton(R.string.dialog_cancel_button, new DialogButtonOnClickListener());
+        builder.setPositiveButton(R.string.dialog_regist_button, null);
+        builder.setNegativeButton(R.string.dialog_cancel_button, null);
         builder.setView(rootView);
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
+        // ボタン押下でダイアログが閉じないようにリスナーを設定する。
+        dialog.setOnShowListener(new OnShowListener() {
+            /**
+             * 表示される時に呼び出される。
+             *
+             * @param dialog ダイアログ
+             */
+            @Override
+            public void onShow(DialogInterface dialog) {
+                // 登録ボタンにリスナーを設定する。
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // 登録ボタンの処理を行う。
+                        doResistButton();
+                    }
+                });
+
+                // キャンセルボタンにリスナーを設定する。
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_NEGATIVE).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // キャンセルボタンの処理を行う。
+                        doCancelButton();
+                    }
+                });
+            }
+        });
 
         mLogger.d("OUT(OUT)");
         return dialog;
@@ -174,204 +209,157 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
         mLogger.d("OUT(OUT)");
     }
 
-    /**************************************************************************/
     /**
-     * ダイアログボタンクリックリスナークラス
-     *
+     * 店名ボタンの処理を行う。
      */
-    private class ButtonOnClickListener implements OnClickListener {
+    private void doShopNameButton() {
+        // 店リスト画面を表示する。
+        Intent intent = new Intent(getActivity(), ShopListActivity.class);
+        startActivityForResult(intent, RequestCode.SHOP_LIST);
+    }
+    
+    /**
+     * 登録ボタンの処理を行う。
+     */
+    private void doResistButton() {
+        mLogger.d("IN");
 
-        /** ロガー */
-        private Logger mLogger = new Logger(ButtonOnClickListener.class);
-
-        /**
-         * ボタンがクリックされた時に呼び出される。
-         *
-         * @param v クリックされたボタン
-         */
-        @Override
-        public void onClick(View v) {
-            mLogger.d("IN");
-
-            // ボタンにより処理を判別する。
-            switch (v.getId()) {
-            // 店名ボタンの場合
-            case R.id.shopNameButton:
-                mLogger.d("shopNameButton");
-
-                // 店リスト画面を表示する。
-                Intent intent = new Intent(getActivity(), ShopListActivity.class);
-                startActivityForResult(intent, RequestCode.SHOP_LIST);
-                break;
-            }
-
-            mLogger.d("OUT(OUT)");
+        // 入力値を取得する。
+        String shopName       = mShopNameValue.getText().toString();
+        String quantityString = mQuantityValue.getText().toString();
+        String priceString    = mPriceValue.getText().toString();
+        String memo           = mMemoValue.getText().toString();
+        // 未入力の項目がある場合
+        if ((null == shopName      ) || "".equals(shopName      ) ||
+            (null == quantityString) || "".equals(quantityString) ||
+            (null == priceString   ) || "".equals(priceString   )) {
+            toast(R.string.error_input_all);
+            mLogger.w("OUT(NG)");
+            return;
         }
+
+        // 数量を取得する。
+        double quantity = 0.0D;
+        try {
+            quantity = Double.parseDouble(quantityString);
+        } catch (Exception e) {
+            mLogger.e(e);
+            toast(R.string.error_illeagal_quantity);
+            mLogger.w("OUT(NG)");
+            return;
+        }
+
+        // 価格を取得する。
+        long price = 0L;
+        try {
+            price = Long.parseLong(priceString);
+        } catch (Exception e) {
+            mLogger.e(e);
+            toast(R.string.error_illeagal_price);
+            mLogger.w("OUT(NG)");
+            return;
+        }
+
+        ContentResolver resolver = getActivity().getContentResolver();
+
+        {
+            // 登録済みか確認する。
+            String selection = PriceTable.SHOP_ID + " = ?";
+            String[] selectionArgs = {String.valueOf(mPriceData.getShopId())};
+            Cursor c = resolver.query(LowestProvider.PRICE_CONTENT_URI, null, selection, selectionArgs, null);
+            try {
+                // カーソルがある場合
+                if (null != c) {
+                    // データがある場合
+                    if (c.moveToFirst()) {
+                        // 価格IDを変更し、更新データとする。
+                        mPriceData.setId(c.getLong(c.getColumnIndex(PriceTable.ID)));
+                    }
+                }
+            } finally {
+                if (null != c) {
+                    c.close();
+                }
+            }
+        }
+
+        {
+            long updateTime = new Date().getTime();
+            ContentValues values = new ContentValues();
+            values.put(PriceTable.CATEGORY_ID,   mPriceData.getCagetoryId());
+            values.put(PriceTable.CATEGORY_NAME, mPriceData.getCategoryName());
+            values.put(PriceTable.GOODS_ID,      mPriceData.getGoodsId());
+            values.put(PriceTable.GOODS_NAME,    mPriceData.getGoodsName());
+            values.put(PriceTable.SHOP_ID,       mPriceData.getShopId());
+            values.put(PriceTable.SHOP_NAME,     mPriceData.getShopName());
+            values.put(PriceTable.QUANTITY,      quantity);
+            values.put(PriceTable.PRICE,         price);
+            values.put(PriceTable.MEMO,          memo);
+            values.put(PriceTable.UPDATE_TIME,   updateTime);
+
+            // 価格データIDを取得する。
+            long priceId = mPriceData.getId();
+
+            // 未登録の場合
+            if (0 == priceId) {
+                Uri result = resolver.insert(LowestProvider.PRICE_CONTENT_URI, values);
+
+                // 登録に失敗した場合
+                if (null == result) {
+                    toast(R.string.error_regist);
+                    mLogger.w("OUT(NG)");
+                    return;
+
+                // 登録に成功した場合
+                } else {
+                    mPriceData.setId(ContentUris.parseId(result));
+                    mPriceData.setQuantity(quantity);
+                    mPriceData.setPrice(price);
+                    mPriceData.setMemo(memo);
+                    mPriceData.setUpdateTime(updateTime);
+                }
+
+            // 登録済みの場合
+            } else {
+                String selection = PriceTable.ID + " = ?";
+                String[] selectionArgs = {String.valueOf(priceId)};
+                int result =
+                        resolver.update(LowestProvider.PRICE_CONTENT_URI, values, selection, selectionArgs);
+
+                // 更新に失敗した場合
+                if (1 != result) {
+                    toast(R.string.error_update);
+                    mLogger.w("OUT(NG)");
+                    return;
+
+                // 更新に成功した場合
+                } else {
+                    mPriceData.setQuantity(quantity);
+                    mPriceData.setPrice(price);
+                    mPriceData.setMemo(memo);
+                    mPriceData.setUpdateTime(updateTime);
+                }
+            }
+        }
+
+        // 更新を通知する。
+        mOnUpdateListener.onUpdate();
+
+        // 終了する。
+        dismiss();
+        mLogger.d("OUT(OK)");
     }
 
-    /**************************************************************************/
     /**
-     * ダイアログボタンクリックリスナークラス
-     *
+     * キャンセルボタンの処理を行う。
      */
-    private class DialogButtonOnClickListener implements DialogInterface.OnClickListener {
+    private void doCancelButton() {
+        mLogger.d("IN");
 
-        /** ロガー */
-        private Logger mLogger = new Logger(DialogButtonOnClickListener.class);
+        toast(R.string.error_cancel);
 
-        /**
-         * ボタンがクリックされた時に呼び出される。
-         *
-         * @param dialog ダイアログ
-         * @param which クリックされたボタン
-         */
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            mLogger.d("IN");
-
-            // ボタンにより処理を判別する。
-            switch (which) {
-            // 登録ボタンの場合
-            case Dialog.BUTTON_POSITIVE:
-                mLogger.d("BUTTON_POSITIVE");
-
-                // 入力値を取得する。
-                String shopName       = mShopNameValue.getText().toString();
-                String quantityString = mQuantityValue.getText().toString();
-                String priceString    = mPriceValue.getText().toString();
-                String memo           = mMemoValue.getText().toString();
-                // 未入力の項目がある場合
-                if ((null == shopName      ) || "".equals(shopName      ) ||
-                    (null == quantityString) || "".equals(quantityString) ||
-                    (null == priceString   ) || "".equals(priceString   )) {
-                    toast(R.string.error_input_all);
-                    mLogger.w("OUT(NG)");
-                    return;
-                }
-
-                // 数量を取得する。
-                double quantity = 0.0D;
-                try {
-                    quantity = Double.parseDouble(quantityString);
-                } catch (Exception e) {
-                    mLogger.e(e);
-                    toast(R.string.error_illeagal_quantity);
-                    mLogger.w("OUT(NG)");
-                    return;
-                }
-
-                // 価格を取得する。
-                long price = 0L;
-                try {
-                    price = Long.parseLong(priceString);
-                } catch (Exception e) {
-                    mLogger.e(e);
-                    toast(R.string.error_illeagal_price);
-                    mLogger.w("OUT(NG)");
-                    return;
-                }
-
-                ContentResolver resolver = getActivity().getContentResolver();
-
-                {
-                    // 登録済みか確認する。
-                    String selection = PriceTable.SHOP_ID + " = ?";
-                    String[] selectionArgs = {String.valueOf(mPriceData.getShopId())};
-                    Cursor c = resolver.query(LowestProvider.PRICE_CONTENT_URI, null, selection, selectionArgs, null);
-                    try {
-                        // カーソルがある場合
-                        if (null != c) {
-                            // データがある場合
-                            if (c.moveToFirst()) {
-                                // 価格IDを変更し、更新データとする。
-                                mPriceData.setId(c.getLong(c.getColumnIndex(PriceTable.ID)));
-                            }
-                        }
-                    } finally {
-                        if (null != c) {
-                            c.close();
-                        }
-                    }
-                }
-
-                {
-                    long updateTime = new Date().getTime();
-                    ContentValues values = new ContentValues();
-                    values.put(PriceTable.CATEGORY_ID,   mPriceData.getCagetoryId());
-                    values.put(PriceTable.CATEGORY_NAME, mPriceData.getCategoryName());
-                    values.put(PriceTable.GOODS_ID,      mPriceData.getGoodsId());
-                    values.put(PriceTable.GOODS_NAME,    mPriceData.getGoodsName());
-                    values.put(PriceTable.SHOP_ID,       mPriceData.getShopId());
-                    values.put(PriceTable.SHOP_NAME,     mPriceData.getShopName());
-                    values.put(PriceTable.QUANTITY,      quantity);
-                    values.put(PriceTable.PRICE,         price);
-                    values.put(PriceTable.MEMO,          memo);
-                    values.put(PriceTable.UPDATE_TIME,   updateTime);
-
-                    // 価格データIDを取得する。
-                    long priceId = mPriceData.getId();
-
-                    // 未登録の場合
-                    if (0 == priceId) {
-                        Uri result = resolver.insert(LowestProvider.PRICE_CONTENT_URI, values);
-
-                        // 登録に失敗した場合
-                        if (null == result) {
-                            toast(R.string.error_regist);
-                            mLogger.w("OUT(NG)");
-                            return;
-
-                        // 登録に成功した場合
-                        } else {
-                            mPriceData.setId(ContentUris.parseId(result));
-                            mPriceData.setQuantity(quantity);
-                            mPriceData.setPrice(price);
-                            mPriceData.setMemo(memo);
-                            mPriceData.setUpdateTime(updateTime);
-                        }
-
-                    // 登録済みの場合
-                    } else {
-                        String selection = PriceTable.ID + " = ?";
-                        String[] selectionArgs = {String.valueOf(priceId)};
-                        int result =
-                                resolver.update(LowestProvider.PRICE_CONTENT_URI, values, selection, selectionArgs);
-
-                        // 更新に失敗した場合
-                        if (1 != result) {
-                            toast(R.string.error_update);
-                            mLogger.w("OUT(NG)");
-                            return;
-
-                        // 更新に成功した場合
-                        } else {
-                            mPriceData.setQuantity(quantity);
-                            mPriceData.setPrice(price);
-                            mPriceData.setMemo(memo);
-                            mPriceData.setUpdateTime(updateTime);
-                        }
-                    }
-                }
-
-                // 更新を通知する。
-                mOnUpdateListener.onUpdate();
-
-                // 終了する。
-                dismiss();
-                break;
-
-            // キャンセルボタンの場合
-            case Dialog.BUTTON_NEGATIVE:
-                mLogger.d("BUTTON_NEGATIVE");
-
-                toast(R.string.error_cancel);
-
-                // 終了する。
-                dismiss();
-                break;
-            }
-
-            mLogger.d("OUT(OUT)");
-        }
+        // 終了する。
+        dismiss();
+        mLogger.d("OUT(OK)");
     }
 }

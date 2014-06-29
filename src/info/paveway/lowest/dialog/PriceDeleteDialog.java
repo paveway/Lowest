@@ -11,7 +11,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnShowListener;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
 
 /**
  * 最低価格記録アプリ
@@ -86,69 +89,67 @@ public class PriceDeleteDialog extends AbstractBaseDialogFragment {
                 mPriceData.getShopName() +
                 getResourceString(R.string.dialog_delete_message_suffix);
         builder.setMessage(message);
-        builder.setPositiveButton(R.string.dialog_delete_button, new DialogButtonOnClickListener());
-        builder.setNegativeButton(R.string.dialog_cancel_button, new DialogButtonOnClickListener());
+        builder.setPositiveButton(R.string.dialog_delete_button, null);
+        builder.setNegativeButton(R.string.dialog_cancel_button, null);
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
+        // ボタン押下でダイアログが閉じないようにリスナーを設定する。
+        dialog.setOnShowListener(new OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        doDelete();
+                    }
+                });
+
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_NEGATIVE).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        doCancel();
+                    }
+                });
+            }
+        });
 
         mLogger.d("OUT(OK)");
         return dialog;
     }
 
-    /**************************************************************************/
     /**
-     * ダイアログボタンクリックリスナークラス
-     *
+     * 削除する。
      */
-    private class DialogButtonOnClickListener implements DialogInterface.OnClickListener {
+    private void doDelete() {
+        mLogger.d("IN");
 
-        /** ロガー */
-        private Logger mLogger = new Logger(DialogButtonOnClickListener.class);
-
-        /**
-         * ボタンがクリックされた時に呼び出される。
-         *
-         * @param dialog ダイアログ
-         * @param which クリックされたボタン
-         */
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            mLogger.d("IN");
-
-            // ボタンにより処理を判別する。
-            switch (which) {
-            // 削除ボタンの場合
-            case Dialog.BUTTON_POSITIVE:
-                mLogger.d("BUTTON_POSITIVE");
-
-                String selection = PriceTable.ID + " = ?";
-                String[] selectionArgs = {String.valueOf(mPriceData.getId())};
-                int result = getActivity().getContentResolver().delete(LowestProvider.PRICE_CONTENT_URI, selection, selectionArgs);
-                if (0 == result) {
-                    toast(R.string.error_delete);
-                    mLogger.w("OUT(NG)");
-                    return;
-                }
-
-                // 更新を通知する。
-                mOnUpdateListener.onUpdate();
-
-                // 終了する。
-                dismiss();
-                break;
-
-            // キャンセルボタンの場合
-            case Dialog.BUTTON_NEGATIVE:
-                mLogger.d("BUTTON_NEGATIVE");
-
-                toast(R.string.error_cancel);
-
-                // 終了する。
-                dismiss();
-                break;
-            }
-
-            mLogger.d("OUT(OUT)");
+        String selection = PriceTable.ID + " = ?";
+        String[] selectionArgs = {String.valueOf(mPriceData.getId())};
+        int result = getActivity().getContentResolver().delete(LowestProvider.PRICE_CONTENT_URI, selection, selectionArgs);
+        if (0 == result) {
+            toast(R.string.error_delete);
+            mLogger.w("OUT(NG)");
+            return;
         }
+
+        // 更新を通知する。
+        mOnUpdateListener.onUpdate();
+
+        // 終了する。
+        dismiss();
+        mLogger.d("OUT(OK)");
+    }
+
+    /**
+     * キャンセルする。
+     */
+    private void doCancel() {
+        mLogger.d("IN");
+
+        toast(R.string.error_cancel);
+
+        // 終了する。
+        dismiss();
+        mLogger.d("OUT(OK)");
     }
 }

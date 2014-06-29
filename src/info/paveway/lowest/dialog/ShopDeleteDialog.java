@@ -17,7 +17,10 @@ import android.app.Dialog;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnShowListener;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
 
 /**
  * 最低価格記録アプリ
@@ -92,92 +95,91 @@ public class ShopDeleteDialog extends AbstractBaseDialogFragment {
                 mShopData.getName() +
                 getResourceString(R.string.dialog_delete_message_suffix);
         builder.setMessage(message);
-        builder.setPositiveButton(R.string.dialog_delete_button, new DialogButtonOnClickListener());
-        builder.setNegativeButton(R.string.dialog_cancel_button, new DialogButtonOnClickListener());
+        builder.setPositiveButton(R.string.dialog_delete_button, null);
+        builder.setNegativeButton(R.string.dialog_cancel_button, null);
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
+        // ボタン押下でダイアログが閉じないようにリスナーを設定する。
+        dialog.setOnShowListener(new OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        doDelete();
+                    }
+                });
+
+                ((AlertDialog)dialog).getButton(Dialog.BUTTON_NEGATIVE).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        doCancel();
+                    }
+                });
+            }
+        });
 
         mLogger.d("OUT(OK)");
         return dialog;
     }
 
-    /**************************************************************************/
     /**
-     * ダイアログボタンクリックリスナークラス
-     *
+     * 削除する。
      */
-    private class DialogButtonOnClickListener implements DialogInterface.OnClickListener {
+    private void doDelete() {
+        mLogger.d("IN");
 
-        /** ロガー */
-        private Logger mLogger = new Logger(DialogButtonOnClickListener.class);
+        // 操作リストを生成する。
+        ArrayList<ContentProviderOperation> operationList =
+                new ArrayList<ContentProviderOperation>();
 
-        /**
-         * ボタンがクリックされた時に呼び出される。
-         *
-         * @param dialog ダイアログ
-         * @param which クリックされたボタン
-         */
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            mLogger.d("IN");
+        String shopId = String.valueOf(mShopData.getId());
 
-            // ボタンにより処理を判別する。
-            switch (which) {
-            // 削除ボタンの場合
-            case Dialog.BUTTON_POSITIVE:
-                mLogger.d("BUTTON_POSITIVE");
+        String selection = ShopTable.ID + " = ?";
+        String[] selectionArgs = {shopId};
 
-             // 操作リストを生成する。
-                ArrayList<ContentProviderOperation> operationList =
-                        new ArrayList<ContentProviderOperation>();
+        // 店テーブルのデータを削除する。
+        ContentProviderOperation.Builder builder =
+                   ContentProviderOperation.newDelete(LowestProvider.SHOP_CONTENT_URI);
+        builder.withSelection(selection, selectionArgs);
+        operationList.add(builder.build());
 
-                String shopId = String.valueOf(mShopData.getId());
+        // 価格テーブルのデータを削除する。
+        builder = ContentProviderOperation.newDelete(LowestProvider.PRICE_CONTENT_URI);
+        selection = PriceTable.SHOP_ID + " = ?";
+        builder.withSelection(selection, selectionArgs);
+        operationList.add(builder.build());
 
-                String selection = ShopTable.ID + " = ?";
-                String[] selectionArgs = {shopId};
+        ContentResolver resolver = getActivity().getContentResolver();
 
-                // 店テーブルのデータを削除する。
-                ContentProviderOperation.Builder builder =
-                           ContentProviderOperation.newDelete(LowestProvider.SHOP_CONTENT_URI);
-                builder.withSelection(selection, selectionArgs);
-                operationList.add(builder.build());
-
-                // 価格テーブルのデータを削除する。
-                builder = ContentProviderOperation.newDelete(LowestProvider.PRICE_CONTENT_URI);
-                selection = PriceTable.SHOP_ID + " = ?";
-                builder.withSelection(selection, selectionArgs);
-                operationList.add(builder.build());
-
-                ContentResolver resolver = getActivity().getContentResolver();
-
-                // バッチ処理を行う。
-                try {
-                    resolver.applyBatch(LowestProvider.AUTHORITY, operationList);
-                } catch (Exception e) {
-                    mLogger.e(e);
-                    toast(R.string.error_delete);
-                    mLogger.w("OUT(NG)");
-                    return;
-                }
-
-                // 更新を通知する。
-                mOnUpdateListener.onUpdate();
-
-                // 終了する。
-                dismiss();
-                break;
-
-            // キャンセルボタンの場合
-            case Dialog.BUTTON_NEGATIVE:
-
-                toast(R.string.error_cancel);
-
-                // 終了する。
-                dismiss();
-                break;
-            }
-
-            mLogger.d("OUT(OK)");
+        // バッチ処理を行う。
+        try {
+            resolver.applyBatch(LowestProvider.AUTHORITY, operationList);
+        } catch (Exception e) {
+            mLogger.e(e);
+            toast(R.string.error_delete);
+            mLogger.w("OUT(NG)");
+            return;
         }
+
+        // 更新を通知する。
+        mOnUpdateListener.onUpdate();
+
+        // 終了する。
+        dismiss();
+        mLogger.d("OUT(OK)");
+    }
+
+    /**
+     * キャンセルする。
+     */
+    private void doCancel() {
+        mLogger.d("IN");
+
+        toast(R.string.error_cancel);
+
+        // 終了する。
+        dismiss();
+        mLogger.d("OUT(OK)");
     }
 }

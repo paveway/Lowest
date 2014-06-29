@@ -264,7 +264,7 @@ public class CategoryListActivity extends AbstractBaseActivity implements OnUpda
             // 「未指定」データの場合
             if (0 == position) {
                 // 変更不可とする。
-                toast("このデータは変更できません");
+                toast(R.string.error_change);
 
             // 上記以外
             } else {
