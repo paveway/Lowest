@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="info.paveway.lowest"
     android:versionCode="1"
-    android:versionName="1.0.20140627" >
+    android:versionName="1.0.20140630" >
 
     <uses-sdk
         android:minSdkVersion="11"
@@ -25,16 +25,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ShopListActivity"
-            android:label="@string/shop_list_name" android:theme="@style/Theme.AppCompat.Light">
-        </activity>
-        <activity
             android:name=".CategoryListActivity"
             android:label="@string/category_list_name" android:theme="@style/Theme.AppCompat.Light">
         </activity>
         <activity
+            android:name=".ShopListActivity"
+            android:label="@string/shop_list_name" android:theme="@style/Theme.AppCompat.Light">
+        </activity>
+        <activity
             android:name=".PriceListActivity"
             android:label="@string/price_list_name" android:theme="@style/Theme.AppCompat.Light">
+        </activity>
+        <activity
+            android:name=".CategorySettingActivity"
+            android:label="@string/category_setting_name" android:theme="@style/Theme.AppCompat.Light">
         </activity>
 
         <activity

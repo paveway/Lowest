@@ -660,7 +660,7 @@ public class LowestProvider extends ContentProvider {
         private Logger mLogger = new Logger(DataHelper.class);
 
         /** データベースバージョン */
-        private static final int DB_VERSION = 2;
+        private static final int DB_VERSION = 1;
 
         /** カテゴリテーブル削除SQL */
         private static final String DROP_CATEGORY_TABLE_SQL = "DROP TABLE IF EXISTS " + TableName.CATEGORY;
@@ -756,74 +756,34 @@ public class LowestProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             mLogger.d("IN");
 
-            db.beginTransaction();
+            // 新規にテーブルを生成する。
+            db.execSQL(CREATE_CATEGORY_TABLE_SQL);
+            db.execSQL(CREATE_GOODS_TABLE_SQL);
+            db.execSQL(CREATE_SHOP_TABLE_SQL);
+            db.execSQL(CREATE_PRICE_TABLE_SQL);
 
-            try {
-//                // 既存のテーブルを削除する。
-//                db.execSQL(DROP_CATEGORY_TABLE_SQL);
-//                db.execSQL(DROP_GOODS_TABLE_SQL);
-//                db.execSQL(DROP_SHOP_TABLE_SQL);
-//                db.execSQL(DROP_PRICE_TABLE_SQL);
-                
-                // 新規にテーブルを生成する。
-                db.execSQL(CREATE_CATEGORY_TABLE_SQL);
-                db.execSQL(CREATE_GOODS_TABLE_SQL);
-                db.execSQL(CREATE_SHOP_TABLE_SQL);
-                db.execSQL(CREATE_PRICE_TABLE_SQL);
+            // デフォルト値を取得する。
+            String defaultValue = mResources.getString(R.string.default_value);
 
-                // デフォルト値を取得する。
-                String defaultValue = mResources.getString(R.string.default_value);
+            SQLiteStatement stmt1 = db.compileStatement(INSERT_CATEGORY_TABLE_SQL);
+            long update = new Date().getTime();
+            insertCatetoryTable(stmt1, defaultValue,  update);
+            insertCatetoryTable(stmt1, "食品",        update);
+            insertCatetoryTable(stmt1, "日用品",      update);
+            insertCatetoryTable(stmt1, "電化製品",    update);
+            insertCatetoryTable(stmt1, "家具",        update);
 
-                SQLiteStatement stmt1 = db.compileStatement(INSERT_CATEGORY_TABLE_SQL);
-                long update = new Date().getTime();
-                insertCatetoryTable(stmt1, defaultValue,  update);
-                insertCatetoryTable(stmt1, "食品",        update);
-                insertCatetoryTable(stmt1, "日用品",      update);
-                insertCatetoryTable(stmt1, "電化製品",    update);
-                insertCatetoryTable(stmt1, "家具",        update);
-
-                SQLiteStatement stmt2 = db.compileStatement(INSERT_SHOP_TABLE_SQL);
-                insertShopTable(stmt2, defaultValue,       update);
-                insertShopTable(stmt2, "イトーヨーカ堂",   update);
-                insertShopTable(stmt2, "ヨークマート",     update);
-                insertShopTable(stmt2, "ヨークベニマル",   update);
-                insertShopTable(stmt2, "西友",             update);
-                insertShopTable(stmt2, "イオン",           update);
-                insertShopTable(stmt2, "マックスバリュ",   update);
-                insertShopTable(stmt2, "ダイエー",         update);
-                insertShopTable(stmt2, "トポス",           update);
-                insertShopTable(stmt2, "グルメシティ",     update);
-                insertShopTable(stmt2, "スーパーアルプス", update);
-                insertShopTable(stmt2, "いなげや",         update);
-                insertShopTable(stmt2, "エコス",           update);
-                insertShopTable(stmt2, "オーケーストア",   update);
-                insertShopTable(stmt2, "オザム",           update);
-                insertShopTable(stmt2, "オリンピック",     update);
-                insertShopTable(stmt2, "カスミ",           update);
-                insertShopTable(stmt2, "紀ノ国屋",         update);
-                insertShopTable(stmt2, "クイーンズ伊勢丹", update);
-                insertShopTable(stmt2, "京王ストア",       update);
-                insertShopTable(stmt2, "サミット",         update);
-                insertShopTable(stmt2, "ジャパンミート",   update);
-                insertShopTable(stmt2, "東武ストア",       update);
-                insertShopTable(stmt2, "マイン",           update);
-                insertShopTable(stmt2, "ベルク",           update);
-                insertShopTable(stmt2, "マミーマート",     update);
-                insertShopTable(stmt2, "ヤオコー",         update);
-                insertShopTable(stmt2, "ピーコックストア", update);
-                insertShopTable(stmt2, "成城石井",         update);
-                insertShopTable(stmt2, "明治屋",           update);
-                insertShopTable(stmt2, "ユニー",           update);
-                insertShopTable(stmt2, "長崎屋",           update);
-                insertShopTable(stmt2, "ライフ",           update);
-                insertShopTable(stmt2, "サエキ",           update);
-
-                // トランザクション成功とする。
-                db.setTransactionSuccessful();
-            } finally {
-                // トランザクションを終了する。
-                db.endTransaction();
-            }
+            SQLiteStatement stmt2 = db.compileStatement(INSERT_SHOP_TABLE_SQL);
+            insertShopTable(stmt2, defaultValue,       update);
+            insertShopTable(stmt2, "イトーヨーカドー", update);
+            insertShopTable(stmt2, "西友",             update);
+            insertShopTable(stmt2, "イオン",           update);
+            insertShopTable(stmt2, "ダイエー",         update);
+            insertShopTable(stmt2, "ヤマダ電機",       update);
+            insertShopTable(stmt2, "エディオン",       update);
+            insertShopTable(stmt2, "ケーズデンキ",     update);
+            insertShopTable(stmt2, "ヨドバシカメラ",   update);
+            insertShopTable(stmt2, "ビックカメラ",     update);
 
             mLogger.d("OUT(OK)");
         }

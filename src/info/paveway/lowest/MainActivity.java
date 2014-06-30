@@ -95,9 +95,9 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         actionBar.setListNavigationCallbacks(adapter, new CategoryFilterOnNavigationListener());
 
         String[] drawerListItems = {
-                getResourceString(R.string.menu_category_setting),
-                getResourceString(R.string.menu_shop_setting),
-                getResourceString(R.string.menu_settings),
+//                getResourceString(R.string.menu_category_setting),
+//                getResourceString(R.string.menu_shop_setting),
+//                getResourceString(R.string.menu_settings),
                 getResourceString(R.string.menu_info)};
         mDrawerList = (ListView)findViewById(R.id.drawerList);
         mDrawerList.setAdapter(
@@ -108,28 +108,29 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                 case 0: {
-                    // カテゴリリスト画面を表示する。
-                    Intent intent = new Intent(MainActivity.this, CategoryListActivity.class);
-                    startActivity(intent);
-                    break;
-                }
-                
-                case 1: {
-                    // 店リスト画面を表示する。
-                    Intent intent = new Intent(MainActivity.this, ShopListActivity.class);
-                    startActivity(intent);
-                    break;
-                }
-                    
-                case 2:
-                    break;
-                
-                case 3:
+//                    // カテゴリ設定画面を表示する。
+//                    Intent intent = new Intent(MainActivity.this, CategorySettingActivity.class);
+//                    startActivity(intent);
+//                    break;
+//                }
+//
+//                case 1: {
+//                    // 店リスト画面を表示する。
+//                    Intent intent = new Intent(MainActivity.this, ShopListActivity.class);
+//                    startActivity(intent);
+//                    break;
+//                }
+//
+//                case 2:
+//                    break;
+//
+//                case 3: {
                     // バージョン情報ダイアログを表示する。
                     FragmentManager manager = getSupportFragmentManager();
                     InfoDialog infoDialog = InfoDialog.newInstance();
                     infoDialog.show(manager, InfoDialog.class.getSimpleName());
                     break;
+                }
                 }
             }
         });
@@ -140,9 +141,9 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
                         this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
             @Override
             public void onDrawerClosed(View view) {
-//                supportInvalidateOptionsMenu();
+                supportInvalidateOptionsMenu();
             }
- 
+
             @Override
             public void onDrawerOpened(View drawerView) {
                 supportInvalidateOptionsMenu();
@@ -153,7 +154,7 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         // アプリアイコンのクリック有効化
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
- 
+
         // 商品追加ボタンにリスナーを設定する。
         ((Button)findViewById(R.id.addGoodsButton)).setOnClickListener(new ButtonOnClickListener());
 
@@ -245,26 +246,26 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
 
         // メニューにより処理を判別する。
         switch (item.getItemId()) {
-        // カテゴリ設定の場合
-        case R.id.menu_category_setting: {
-            // カテゴリリスト画面を表示する。
-            Intent intent = new Intent(MainActivity.this, CategoryListActivity.class);
-            startActivity(intent);
-            break;
-        }
-            
-        // 店設定の場合
-        case R.id.menu_shop_setting: {
-            // 店リスト画面を表示する。
-            Intent intent = new Intent(MainActivity.this, ShopListActivity.class);
-            startActivity(intent);
-            break;
-        }
-            
-        // その他設定の場合
-        case R.id.menu_settings:
-            break;
-            
+//        // カテゴリ設定の場合
+//        case R.id.menu_category_setting: {
+//            // カテゴリ設定画面を表示する。
+//            Intent intent = new Intent(MainActivity.this, CategorySettingActivity.class);
+//            startActivity(intent);
+//            break;
+//        }
+//
+//        // 店設定の場合
+//        case R.id.menu_shop_setting: {
+//            // 店リスト画面を表示する。
+//            Intent intent = new Intent(MainActivity.this, ShopListActivity.class);
+//            startActivity(intent);
+//            break;
+//        }
+//
+//        // その他設定の場合
+//        case R.id.menu_settings:
+//            break;
+
         // バージョン情報の場合
         case R.id.menu_info:
             // バージョン情報ダイアログを表示する。

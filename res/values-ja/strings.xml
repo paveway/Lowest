@@ -2,10 +2,11 @@
 <resources>
 
     <!-- 画面タイトル -->
-    <string name="app_name">最低価格記録</string>
+    <string name="app_name">最低価格</string>
     <string name="category_list_name">カテゴリリスト</string>
     <string name="shop_list_name">店リスト</string>
     <string name="price_list_name">価格リスト</string>
+    <string name="category_setting_name">カテゴリ設定</string>
 
     <!-- メニュー名 -->
     <string name="menu_category_setting">カテゴリ設定</string>
@@ -56,7 +57,7 @@
 
     <!-- バージョン情報ダイアログ -->
     <string name="info_dialog_title">バージョン情報</string>
-    <string name="info_dialog_message_prefix">最低価格記録アプリ\nVer.</string>
+    <string name="info_dialog_message_prefix">最低価格\nVer.</string>
     <string name="info_dialog_message_suffix">\nCopyright(C) paveway.info. All rights reserved.</string>
     <string name="info_dialog_positive_button">閉じる</string>
 
@@ -82,7 +83,7 @@
     <string name="error_illeagal_price">価格が不正な値です</string>
 
     <string name="default_value">未指定</string>
-    
+
     <string name="drawer_open">開く</string>
     <string name="drawer_close">閉じる</string>
 
