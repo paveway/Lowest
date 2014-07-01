@@ -217,7 +217,7 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
         Intent intent = new Intent(getActivity(), ShopListActivity.class);
         startActivityForResult(intent, RequestCode.SHOP_LIST);
     }
-    
+
     /**
      * 登録ボタンの処理を行う。
      */
@@ -264,8 +264,8 @@ public class PriceEditDialog extends AbstractBaseDialogFragment {
 
         {
             // 登録済みか確認する。
-            String selection = PriceTable.SHOP_ID + " = ?";
-            String[] selectionArgs = {String.valueOf(mPriceData.getShopId())};
+            String selection = PriceTable.SHOP_ID + " = ? AND " + PriceTable.GOODS_ID + " = ?";
+            String[] selectionArgs = {String.valueOf(mPriceData.getShopId()), String.valueOf(mPriceData.getGoodsId())};
             Cursor c = resolver.query(LowestProvider.PRICE_CONTENT_URI, null, selection, selectionArgs, null);
             try {
                 // カーソルがある場合
