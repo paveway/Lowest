@@ -54,6 +54,9 @@ public class CategorySettingActivity extends AbstractBaseActivity implements OnU
         // レイアウトを設定する。
         setContentView(R.layout.activity_category_list);
 
+        // ADビューをロードする。
+        loadAdView();
+
         // カテゴリデータリストを取得する。
         getCategoryDataList();
 

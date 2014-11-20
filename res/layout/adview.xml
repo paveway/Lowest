@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.ads.AdView
+<com.google.android.gms.ads.AdView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:id="@+id/adView"
     android:layout_width="match_parent"
     android:layout_height="66dp"
     android:layout_alignParentBottom="true"
     android:layout_centerHorizontal="true"
     ads:adSize="BANNER"
-    ads:adUnitId="ca-app-pub-6984834494761648/8209184212"
-    ads:loadAdOnCreate="true" />
+    ads:adUnitId="ca-app-pub-6984834494761648/8209184212" />

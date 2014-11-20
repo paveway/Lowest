@@ -66,6 +66,9 @@ public class PriceListActivity extends AbstractBaseActivity implements OnUpdateL
         // レイアウトを設定する。
         setContentView(R.layout.activity_price_list);
 
+        // ADビューをロードする。
+        loadAdView();
+
         // インテントを取得する。
         Intent intent = getIntent();
         // インテントが取得できない場合
@@ -142,6 +145,7 @@ public class PriceListActivity extends AbstractBaseActivity implements OnUpdateL
                         priceData.setShopName(    c.getString(c.getColumnIndex(PriceTable.SHOP_NAME)));
                         priceData.setQuantity(    c.getDouble(c.getColumnIndex(PriceTable.QUANTITY)));
                         priceData.setPrice(       c.getLong(  c.getColumnIndex(PriceTable.PRICE)));
+                        priceData.setMemo(        c.getString(c.getColumnIndex(PriceTable.MEMO)));
                         priceData.setUpdateTime(  c.getLong(  c.getColumnIndex(PriceTable.UPDATE_TIME)));
 
                         //priceDataList.add(priceData);

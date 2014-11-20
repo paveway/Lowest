@@ -56,6 +56,9 @@ public class CategoryListActivity extends AbstractBaseActivity implements OnUpda
         // レイアウトを設定する。
         setContentView(R.layout.activity_category_list);
 
+        // ADビューをロードする。
+        loadAdView();
+
         // カテゴリデータリストを取得する。
         getCategoryDataList();
 

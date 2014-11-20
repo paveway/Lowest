@@ -58,7 +58,7 @@
     <!-- バージョン情報ダイアログ -->
     <string name="info_dialog_title">バージョン情報</string>
     <string name="info_dialog_message_prefix">最低価格\nVer.</string>
-    <string name="info_dialog_message_suffix">\nCopyright(C) paveway.info. All rights reserved.</string>
+    <string name="info_dialog_message_suffix">\nCopyright(C) 2014. paveway.info. All rights reserved.</string>
     <string name="info_dialog_positive_button">閉じる</string>
 
     <string name="success_regist">登録しました</string>

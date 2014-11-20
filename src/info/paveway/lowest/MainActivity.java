@@ -14,17 +14,22 @@ import info.paveway.lowest.dialog.GoodsDetailDialog;
 import info.paveway.lowest.dialog.GoodsEditDialog;
 import info.paveway.lowest.dialog.InfoDialog;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -62,9 +67,9 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
 
     private int mCategoryFilterPostion;
 
-    private ListView mDrawerList;
-    private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
+//    private ListView mDrawerList;
+//    private DrawerLayout mDrawerLayout;
+//    private ActionBarDrawerToggle mDrawerToggle;
 
     /**
      * 生成された時に呼び出される。
@@ -81,6 +86,24 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         // レイアウトを設定する。
         setContentView(R.layout.activity_main);
 
+        // ADビューをロードする。
+        loadAdView();
+
+        // 初期データを設定する。
+        ContentResolver resolver = getContentResolver();
+        ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
+        getOperations(resolver, "category_name.csv", LowestProvider.CATEGORY_CONTENT_URI, operations);
+        getOperations(resolver, "shop_name.csv", LowestProvider.SHOP_CONTENT_URI, operations);
+        if (0 < operations.size()) {
+            try {
+                resolver.applyBatch(LowestProvider.AUTHORITY, operations);
+            } catch (Exception e) {
+                mLogger.e(e);
+                finish();
+                return;
+            }
+        }
+
         // カテゴリデータリストを取得する。
         getCategoryDataList();
 
@@ -94,20 +117,20 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         actionBar.setListNavigationCallbacks(adapter, new CategoryFilterOnNavigationListener());
 
-        String[] drawerListItems = {
+//        String[] drawerListItems = {
 //                getResourceString(R.string.menu_category_setting),
 //                getResourceString(R.string.menu_shop_setting),
-//                getResourceString(R.string.menu_settings),
-                getResourceString(R.string.menu_info)};
-        mDrawerList = (ListView)findViewById(R.id.drawerList);
-        mDrawerList.setAdapter(
-                new ArrayAdapter<String>(
-                        this, android.R.layout.simple_list_item_1, drawerListItems));
-        mDrawerList.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                case 0: {
+////                getResourceString(R.string.menu_settings),
+//                getResourceString(R.string.menu_info)};
+//        mDrawerList = (ListView)findViewById(R.id.drawerList);
+//        mDrawerList.setAdapter(
+//                new ArrayAdapter<String>(
+//                        this, android.R.layout.simple_list_item_1, drawerListItems));
+//        mDrawerList.setOnItemClickListener(new OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                switch (position) {
+//                case 0: {
 //                    // カテゴリ設定画面を表示する。
 //                    Intent intent = new Intent(MainActivity.this, CategorySettingActivity.class);
 //                    startActivity(intent);
@@ -120,40 +143,40 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
 //                    startActivity(intent);
 //                    break;
 //                }
-//
-//                case 2:
+////
+//                case 2: {
+////                    break;
+////
+////                case 3: {
+//                    // バージョン情報ダイアログを表示する。
+//                    FragmentManager manager = getSupportFragmentManager();
+//                    InfoDialog infoDialog = InfoDialog.newInstance();
+//                    infoDialog.show(manager, InfoDialog.class.getSimpleName());
 //                    break;
+//                }
+//                }
+//            }
+//        });
 //
-//                case 3: {
-                    // バージョン情報ダイアログを表示する。
-                    FragmentManager manager = getSupportFragmentManager();
-                    InfoDialog infoDialog = InfoDialog.newInstance();
-                    infoDialog.show(manager, InfoDialog.class.getSimpleName());
-                    break;
-                }
-                }
-            }
-        });
-
-        mDrawerLayout = (DrawerLayout)findViewById(R.id.drawerLayout);
-        mDrawerToggle =
-                new ActionBarDrawerToggle(
-                        this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
-            @Override
-            public void onDrawerClosed(View view) {
-                supportInvalidateOptionsMenu();
-            }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                supportInvalidateOptionsMenu();
-            }
-        };
-
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-        // アプリアイコンのクリック有効化
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+//        mDrawerLayout = (DrawerLayout)findViewById(R.id.drawerLayout);
+//        mDrawerToggle =
+//                new ActionBarDrawerToggle(
+//                        this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+//            @Override
+//            public void onDrawerClosed(View view) {
+//                supportInvalidateOptionsMenu();
+//            }
+//
+//            @Override
+//            public void onDrawerOpened(View drawerView) {
+//                supportInvalidateOptionsMenu();
+//            }
+//        };
+//
+//        mDrawerLayout.setDrawerListener(mDrawerToggle);
+//        // アプリアイコンのクリック有効化
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setHomeButtonEnabled(true);
 
         // 商品追加ボタンにリスナーを設定する。
         ((Button)findViewById(R.id.addGoodsButton)).setOnClickListener(new ButtonOnClickListener());
@@ -182,7 +205,7 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         mLogger.d("IN");
 
         super.onPostCreate(savedInstanceState);
-        mDrawerToggle.syncState();
+//        mDrawerToggle.syncState();
 
         mLogger.d("OUT(OK)");
     }
@@ -197,7 +220,7 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
         mLogger.d("IN");
 
         super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
+//        mDrawerToggle.onConfigurationChanged(newConfig);
 
         mLogger.d("OUT(OK)");
     }
@@ -246,21 +269,21 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
 
         // メニューにより処理を判別する。
         switch (item.getItemId()) {
-//        // カテゴリ設定の場合
-//        case R.id.menu_category_setting: {
-//            // カテゴリ設定画面を表示する。
-//            Intent intent = new Intent(MainActivity.this, CategorySettingActivity.class);
-//            startActivity(intent);
-//            break;
-//        }
-//
-//        // 店設定の場合
-//        case R.id.menu_shop_setting: {
-//            // 店リスト画面を表示する。
-//            Intent intent = new Intent(MainActivity.this, ShopListActivity.class);
-//            startActivity(intent);
-//            break;
-//        }
+        // カテゴリ設定の場合
+        case R.id.menu_category_setting: {
+            // カテゴリ設定画面を表示する。
+            Intent intent = new Intent(MainActivity.this, CategorySettingActivity.class);
+            startActivity(intent);
+            break;
+        }
+
+        // 店設定の場合
+        case R.id.menu_shop_setting: {
+            // 店リスト画面を表示する。
+            Intent intent = new Intent(MainActivity.this, ShopListActivity.class);
+            startActivity(intent);
+            break;
+        }
 //
 //        // その他設定の場合
 //        case R.id.menu_settings:
@@ -275,11 +298,11 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
             break;
         }
 
-        // アプリアイコンタップ
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            mLogger.d("OUT(OK)");
-            return true;
-        }
+//        // アプリアイコンタップ
+//        if (mDrawerToggle.onOptionsItemSelected(item)) {
+//            mLogger.d("OUT(OK)");
+//            return true;
+//        }
 
         mLogger.d("OUT(OK)");
         return super.onOptionsItemSelected(item);
@@ -288,6 +311,50 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
     /**************************************************************************/
     /*** 内部メソッド                                                       ***/
     /**************************************************************************/
+    private List<String> getInitDataList(String fileName) {
+        List<String> initDataList = new ArrayList<String>();
+        AssetManager assetManager = getResources().getAssets();
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(assetManager.open(fileName)));
+            String line = null;
+            while (null != (line = br.readLine())) {
+                initDataList.add(line);
+            }
+        } catch (IOException e) {
+            mLogger.e(e);
+        } finally {
+            try {
+                if (null != br) {
+                    br.close();
+                }
+            } catch (IOException e) {
+                mLogger.e(e);
+            }
+        }
+
+        return initDataList;
+    }
+
+    private void getOperations(ContentResolver resolver, String fileName, Uri uri, List<ContentProviderOperation> operationList) {
+        Cursor c = resolver.query(uri, null, null, null, null);
+        try {
+            if ((null == c) || !c.moveToFirst()) {
+                List<String> categoryNameList = getInitDataList(fileName);
+                for (String name : categoryNameList) {
+                    ContentProviderOperation.Builder builder =
+                            ContentProviderOperation.newInsert(uri);
+                    builder.withValue(CategoryTable.NAME, name);
+                    operationList.add(builder.build());
+                }
+            }
+        } finally {
+            if (null != c) {
+                c.close();
+            }
+        }
+    }
+
     /**
      * カテゴリデータリストを取得する。
      *
@@ -570,12 +637,12 @@ public class MainActivity extends AbstractBaseActivity implements OnUpdateListen
             }
 
             // 各ウィジットを設定する。
-            TextView categoryNameValue = (TextView)convertView.findViewById(R.id.categoryNameValue);
+//            TextView categoryNameValue = (TextView)convertView.findViewById(R.id.categoryNameValue);
             TextView goodsNameValue    = (TextView)convertView.findViewById(R.id.goodsNameValue);
             TextView unitPriceValue    = (TextView)convertView.findViewById(R.id.unitPriceValue);
             TextView shopNameValue     = (TextView)convertView.findViewById(R.id.shopNameValue);
 
-            categoryNameValue.setText(goodsData.getCategoryName());
+//            categoryNameValue.setText(goodsData.getCategoryName());
             goodsNameValue.setText(goodsData.getName());
 
             // 価格データを取得する。

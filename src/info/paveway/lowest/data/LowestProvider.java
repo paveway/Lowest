@@ -1,11 +1,10 @@
 package info.paveway.lowest.data;
 
 import info.paveway.log.Logger;
-import info.paveway.lowest.R;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import android.content.ContentProvider;
@@ -17,13 +16,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
 import android.content.UriMatcher;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
@@ -40,7 +37,7 @@ public class LowestProvider extends ContentProvider {
     private Logger mLogger = new Logger(LowestProvider.class);
 
     /** Authority */
-    public static final String AUTHORITY = LowestProvider.class.getName().toLowerCase();
+    public static final String AUTHORITY = LowestProvider.class.getName().toLowerCase(Locale.getDefault());
 
     /** ベースコンテントURI文字列 */
     private static final String BASE_CONTENT_URI = "content://" + AUTHORITY + "/";
@@ -662,18 +659,6 @@ public class LowestProvider extends ContentProvider {
         /** データベースバージョン */
         private static final int DB_VERSION = 1;
 
-        /** カテゴリテーブル削除SQL */
-        private static final String DROP_CATEGORY_TABLE_SQL = "DROP TABLE IF EXISTS " + TableName.CATEGORY;
-
-        /** 商品テーブル削除SQL */
-        private static final String DROP_GOODS_TABLE_SQL = "DROP TABLE IF EXISTS " + TableName.GOODS;
-
-        /** 店テーブル削除SQL */
-        private static final String DROP_SHOP_TABLE_SQL = "DROP TABLE IF EXISTS " + TableName.SHOP;
-
-        /** 価格テーブル削除SQL */
-        private static final String DROP_PRICE_TABLE_SQL = "DROP TABLE IF EXISTS " + TableName.PRICE;
-
         /** カテゴリテーブル生成SQL */
         private static final String CREATE_CATEGORY_TABLE_SQL =
                 "CREATE TABLE IF NOT EXISTS " + TableName.CATEGORY +
@@ -721,20 +706,6 @@ public class LowestProvider extends ContentProvider {
                     PriceTable.UPDATE_TIME   + " INTEGER"   +
                 ");";
 
-        private static final String INSERT_CATEGORY_TABLE_SQL =
-                "INSERT INTO " + TableName.CATEGORY + "(" +
-                    CategoryTable.NAME         + ", " +
-                    CategoryTable.UPDATE_TIME  +
-                ") VALUES (?, ?);";
-
-        private static final String INSERT_SHOP_TABLE_SQL =
-                "INSERT INTO " + TableName.SHOP + "(" +
-                    ShopTable.NAME        + ", " +
-                    ShopTable.UPDATE_TIME +
-                ") VALUES (?, ?);";
-
-        private Resources mResources;
-
         /**
          * コンストラクタ
          * スーパークラスのコンストラクタを呼び出す。
@@ -743,7 +714,6 @@ public class LowestProvider extends ContentProvider {
             // スーパークラスのコンストラクタを呼び出す。
             super(context, null, null, DB_VERSION);
             mLogger.d("IN");
-            mResources = context.getResources();
             mLogger.d("OUT(OK)");
         }
 
@@ -756,34 +726,11 @@ public class LowestProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             mLogger.d("IN");
 
-            // 新規にテーブルを生成する。
+            // テーブルを生成する。
             db.execSQL(CREATE_CATEGORY_TABLE_SQL);
             db.execSQL(CREATE_GOODS_TABLE_SQL);
             db.execSQL(CREATE_SHOP_TABLE_SQL);
             db.execSQL(CREATE_PRICE_TABLE_SQL);
-
-            // デフォルト値を取得する。
-            String defaultValue = mResources.getString(R.string.default_value);
-
-            SQLiteStatement stmt1 = db.compileStatement(INSERT_CATEGORY_TABLE_SQL);
-            long update = new Date().getTime();
-            insertCatetoryTable(stmt1, defaultValue,  update);
-            insertCatetoryTable(stmt1, "食品",        update);
-            insertCatetoryTable(stmt1, "日用品",      update);
-            insertCatetoryTable(stmt1, "電化製品",    update);
-            insertCatetoryTable(stmt1, "家具",        update);
-
-            SQLiteStatement stmt2 = db.compileStatement(INSERT_SHOP_TABLE_SQL);
-            insertShopTable(stmt2, defaultValue,       update);
-            insertShopTable(stmt2, "イトーヨーカドー", update);
-            insertShopTable(stmt2, "西友",             update);
-            insertShopTable(stmt2, "イオン",           update);
-            insertShopTable(stmt2, "ダイエー",         update);
-            insertShopTable(stmt2, "ヤマダ電機",       update);
-            insertShopTable(stmt2, "エディオン",       update);
-            insertShopTable(stmt2, "ケーズデンキ",     update);
-            insertShopTable(stmt2, "ヨドバシカメラ",   update);
-            insertShopTable(stmt2, "ビックカメラ",     update);
 
             mLogger.d("OUT(OK)");
         }
@@ -803,25 +750,6 @@ public class LowestProvider extends ContentProvider {
             onCreate(db);
 
             mLogger.d("OUT(OK)");
-        }
-
-        /**
-         * カテゴリテーブルの初期データを新規登録する。
-         *
-         * @param stmt ステートメント
-         * @param categoryName カテゴリ名
-         * @param update 更新日時
-         */
-        private void insertCatetoryTable(SQLiteStatement stmt, String categoryName, long update) {
-            stmt.bindString(1, categoryName);
-            stmt.bindLong(  2, update);
-            stmt.executeInsert();
-        }
-
-        private void insertShopTable(SQLiteStatement stmt, String shopName, long update) {
-            stmt.bindString(1, shopName);
-            stmt.bindLong(  2, update);
-            stmt.executeInsert();
         }
     }
 }

@@ -56,6 +56,9 @@ public class ShopListActivity extends AbstractBaseActivity implements OnUpdateLi
         // レイアウトを設定する。
         setContentView(R.layout.activity_shop_list);
 
+        // ADビューをロードする。
+        loadAdView();
+
         // 店データリストを取得する。
         getShopDataList();
 
